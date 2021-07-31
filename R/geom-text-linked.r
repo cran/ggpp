@@ -146,7 +146,7 @@
 #' p +
 #'   geom_text_linked() +
 #'   annotate(
-#'     "linked_text", label = "plot mpg vs. wt",
+#'     "text_linked", label = "plot mpg vs. wt",
 #'     x = 2, y = 15, size = 3, colour = "red"
 #'   )  +
 #'  expand_limits(x = c(1.5, 6))
@@ -221,7 +221,7 @@ geom_text_linked <- function(mapping = NULL,
     data = data,
     mapping = mapping,
     stat = stat,
-    geom = GeomLinkedText,
+    geom = GeomTextLinked,
     position = position,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
@@ -241,13 +241,24 @@ geom_text_linked <- function(mapping = NULL,
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomLinkedText <-
-  ggplot2::ggproto("GeomLinkedText", ggplot2::Geom,
+GeomTextLinked <-
+  ggplot2::ggproto("GeomTextLinked", ggplot2::Geom,
                     required_aes = c("x", "y", "label"),
 
                     default_aes = ggplot2::aes(
-                      colour = "black", size = 3.88, angle = 0, hjust = 0.5,
-                      vjust = 0.5, alpha = NA, family = "", fontface = 1, lineheight = 1.2
+                      colour = "black",
+                      size = 3.88,
+                      angle = 0,
+                      hjust = 0.5,
+                      vjust = 0.5,
+                      alpha = NA,
+                      family = "",
+                      fontface = 1,
+                      lineheight = 1.2,
+                      segment.linetype = 1,
+                      segment.colour = NULL,
+                      segment.size = 0.5,
+                      segment.alpha = NULL
                     ),
 
                     draw_panel = function(data, panel_params, coord, #panel_scales,

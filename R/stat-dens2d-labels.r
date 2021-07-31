@@ -63,12 +63,10 @@
 #'
 #' @examples
 #'
-#' library(ggrepel)
-#' library(gginnards)
-#'
-#' random_string <- function(len = 6) {
-#' paste(sample(letters, len, replace = TRUE), collapse = "")
-#' }
+#' random_string <-
+#'   function(len = 6) {
+#'     paste(sample(letters, len, replace = TRUE), collapse = "")
+#'   }
 #'
 #' # Make random data.
 #' set.seed(1001)
@@ -84,28 +82,47 @@
 #'   geom_point() +
 #'   stat_dens2d_labels()
 #'
-#' # Using geom_debug() we can see that all 100 rows in \code{d} are
-#' # returned. But only those labelled in the previous example still contain
-#' # the original labels.
 #' ggplot(data = d, aes(x, y, label = lab)) +
 #'   geom_point() +
-#'   stat_dens2d_labels(geom = "debug")
+#'   stat_dens2d_labels(geom = "text_linked",
+#'                      position = position_nudge_center(x = 0.1, y = 0.1,
+#'                                                       center_x = mean,
+#'                                                       center_y = mean),
+#'                      vjust = "outward_mean", hjust = "outward_mean") +
+#'   expand_limits(x = c(-4, 4.5))
 #'
-#' ggplot(data = d, aes(x, y, label = lab, colour = group)) +
-#'   geom_point() +
-#'   stat_dens2d_labels(geom = "text_repel")
+#' ggrepel.installed <- requireNamespace("ggrepel", quietly = TRUE)
+#' if (ggrepel.installed) {
+#'   library(ggrepel)
 #'
-#' ggplot(data = d, aes(x, y, label = lab, colour = group)) +
-#'   geom_point() +
-#'   stat_dens2d_labels(geom = "text_repel", label.fill = NA)
+#'   ggplot(data = d, aes(x, y, label = lab, colour = group)) +
+#'     geom_point() +
+#'     stat_dens2d_labels(geom = "text_repel")
+#'
+#'   ggplot(data = d, aes(x, y, label = lab, colour = group)) +
+#'     geom_point() +
+#'     stat_dens2d_labels(geom = "text_repel", label.fill = NA)
 #'
 #' # we keep labels starting with "a" across the whole plot, but all in sparse
 #' # regions. To achieve this we pass as argument to label.fill a fucntion
 #' # instead of a character string.
-#' label.fun <- function(x) {ifelse(grepl("^a", x), x, "")}
-#' ggplot(data = d, aes(x, y, label = lab, colour = group)) +
-#'   geom_point() +
-#'   stat_dens2d_labels(geom = "text_repel", label.fill = label.fun)
+#'   label.fun <- function(x) {ifelse(grepl("^a", x), x, "")}
+#'   ggplot(data = d, aes(x, y, label = lab, colour = group)) +
+#'     geom_point() +
+#'     stat_dens2d_labels(geom = "text_repel", label.fill = label.fun)
+#' }
+#' # Using geom_debug() we can see that all 100 rows in \code{d} are
+#' # returned. But only those labelled in the previous example still contain
+#' # the original labels.
+#'
+#' gginnards.installed <- requireNamespace("gginnards", quietly = TRUE)
+#' if (gginnards.installed) {
+#'   library(gginnards)
+#'
+#'   ggplot(data = d, aes(x, y, label = lab)) +
+#'     geom_point() +
+#'     stat_dens2d_labels(geom = "debug")
+#' }
 #'
 stat_dens2d_labels <-
   function(mapping = NULL,
