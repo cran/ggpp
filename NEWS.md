@@ -4,6 +4,56 @@ editor_options:
     wrap: 72
 ---
 
+# ggpp 0.4.3
+
+Based on issues raised in the GitHub repository of 'ggrepel' and the
+nudge functions added some time ago to package 'ggpp' it became obvious
+that nudging can help in achieving good repulsion outcomes without need
+of tailored repulsion algorithms for specific cases. Obviously
+developing new ggplot *position* functions is much easier than tweaking
+the repulsion algorithm. It is also clear that not being able to combine
+nudging with stack, jitter and dodge positions made difficult to produce
+some types of plots. One case is replacing a key or legend with direct
+labels to plot elements, which is important in plots aimed at audiences
+outside academia.
+
+In one of the issues in the GitHub repository of 'ggrepel' an answer by
+*M. Krassowski* included code that provided an elegant and simple
+approach to implementing combined position functions without duplicating
+code already in 'ggplot2' by instead calling methods of the parent
+class. I edited this code and included it in the package.
+
+Except for the position functions with names ending in `_keep`, for
+which *normal* counterparts exist, the *keeping* of the original
+position can be disabled by passing `kept.origin = "none"` when they are
+called.
+
+The renaming of `geom_text_linked()` to `geom_text_s()` is code breaking
+but I am now fairly confident this shorter name is easy to remember with
+`s` for segment.
+
+-   Add functions `position_stack_keep()`, `position_fill_keep()`,
+    `position_jitter_keep()`, `position_dodge_keep()` and
+    `position_dodge2_keep()`.
+-   Add functions `position_stacknudge()`, `position_fillnudge()`,
+    `position_jitternudge()`, `position_dodgenudge()` and
+    `position_dodge2nudge()` based on code by M. Krassowski for
+    `position_stack_and_nudge()`.
+-   Revise functions `position_nudge_to()`, `position_nudge_center()`
+    and `position_nudge_line()` adding support for disabling keeping of
+    the original positions.
+-   Add `geom_point_s()` and `geom_label_s()` and update `geom_text_s()`
+    **renamed** from `geom_text_linked()`. This is a ***code breaking
+    change*** with respect to the previous (unstable) version.
+-   Update `geom_plot()`, `geom_table()` and `geom_grob()` to support
+    plotting of segments when positions change, e.g., with nudging.
+-   Update the vignette.
+
+With 12 new and four partly rewritten functions there is quite a lot of
+new code in this update, so even if tested and checked, it is possible
+that bugs may have slipped through. Please, do report them if you
+encounter any.
+
 # ggpp 0.4.2
 
 The initial implementation and user interface of three *apply*
@@ -19,7 +69,7 @@ the three statistics can be considered now stable.
 
 -   Update `stat_summary_xy()` and `stat_apply_group()` to return `NA`
     in `x` and/or `y` when `.fun.x` or `.fun.y` are not passed an
-    argument. This is a code breaking change with respect to the
+    argument. This is a ***code breaking change*** with respect to the
     previous (unstable) version.
 
 -   Update `stat_summary_xy()` and `stat_centroid()` to support
@@ -58,7 +108,7 @@ inspecting them is an earlier spin-off from 'gpmisc'.
 
 Compared to 'ggpmisc' 0.3.9, the following changes have been introduced.
 New justification styles have being implemented to complement
-`position_nudge_center()` . They are supported in `geom_text_linked()`,
+`position_nudge_center()` . They are supported in `geom_text_s()`,
 `geom_plot()`, `geom_table()`, `geom_grob()` and `geom_marging_grob()`.
 In the current implementation all rows in `data` should contain the same
 `hjust` or `vjust` value when using the new types of justification
@@ -88,10 +138,10 @@ near future*.
 -   Revise `compute_npcx()` and `compute_npcy()` to support multiple
     steps per group (needed in 'ggpmisc').
 -   Fix problem related to `"outward"` and `"inward"` justification of
-    text labels when `angle` aesthetic takes values \< -45 or \> 45
+    text labels when `angle` aesthetic takes values \< -45 or > 45
     degrees. This code change alters how old plots are rendered if text
     labels have been rotated by more than 45 degrees.
--   ['ggplot2', 'ggrepel'] The problem with angle was a "bug" in
+-   \['ggplot2', 'ggrepel'\] The problem with angle was a "bug" in
     'ggplot2' also present in 'ggrepel'. A pull request for
     `ggplot2::geom_text()` has been submitted and merged. This is now in
     the 'ggplot2' 3.3.4 milestone retaining consistent behaviour between
@@ -102,7 +152,7 @@ near future*.
 -   Update the documentation of `geom_plot()`.
 -   Revise handling of rounding for $R^2$ and $P$-value in
     `stat_poly_eq()`.
--   [**Under development!**] Link repositioned text to its original
+-   \[**Under development!**\] Link repositioned text to its original
     position with a segment or arrow: `geom_linked_text()`. Except for
     the drawing of segments or arrows this new *geometry* behaves as
     `ggplot2::geom_text()` . *Note:* Segments and arrows are drawn only
@@ -185,20 +235,21 @@ near future*.
 -   Override `ggplot2::annotate()` adding support for aesthetics `npcx`
     and `npcy`.
 -   Add `stat_summary_xy()` and `stat_centroid()`.
--   Revise `stat_poly_eq()` to support labeling of equations according
+-   Revise `stat_poly_eq()` to support labelling of equations according
     to group.
 -   Implement `output.type` `"markdown"` in `stat_poly_eq()` usable with
     `geom_richtext()` from package 'ggtext'.
 
 # ggpmisc 0.3.5
 
--   Add support for "table themes" to geom_table() and
+-   Add support for "table themes" to `geom_table()` and
     `geom_table_npc()`.
 
 # ggpmisc 0.3.4
 
--   Add support for p.value.label and f.value.label to `stat_poly_eq()`.
--   Update to track deprecations in 'ggplot2' (\>= 3.3.0).
+-   Add support for `p.value.label` and `f.value.label` to
+    `stat_poly_eq()`.
+-   Update to track deprecations in 'ggplot2' (>= 3.3.0).
 
 # ggpmisc 0.3.3
 
@@ -210,7 +261,7 @@ near future*.
 This version implements some new features and fixes bugs in the features
 introduced in version 0.3.1, please do rise an issue if you notice any
 remaining bugs! Some reported weaknesses in the documentation have been
-addressed. This updated version depends on 'ggplot2' (\>= 3.2.1).
+addressed. This updated version depends on 'ggplot2' (>= 3.2.1).
 
 -   Add support for *volcano* and *quadrant* *plots* of outcomes.
 
@@ -262,7 +313,7 @@ differences in the positions of labels used as annotations. The many new
 features may still have some bugs, please do rise an issue if you notice
 one!
 
-Version requiring 'ggplot2' (\>= 3.1.0).
+Version requiring 'ggplot2' (>= 3.1.0).
 
 Add new geometries, several of them accepting *x* and *y* in *npc* units
 through the new aesthetics `npcx` and `npcy`, allowing positioning
@@ -301,12 +352,12 @@ of annotate().
 
 # ggpmisc 0.3.0
 
-Version requiring 'ggplot2' (\>= 3.0.0), now in CRAN. **Low level
+Version requiring 'ggplot2' (>= 3.0.0), now in CRAN. **Low level
 manipulation and debug methods and functions moved to new package
 'gginnards' available through CRAN.**
 
--   Remove debug stats and geoms -\> 'gginnards'.
--   Remove layer manipulation functions -\> 'gginnards'.
+-   Remove debug stats and geoms -> 'gginnards'.
+-   Remove layer manipulation functions -> 'gginnards'.
 -   Add support for "weight" aesthetic in `stat_poly_eq()` (fixing bug
     reported by S.Al-Khalidi).
 -   Add support for column selection and renaming to `stat_fit_tb()`.
@@ -321,12 +372,12 @@ manipulation and debug methods and functions moved to new package
 Non-CRAN version with additional functionality, but requiring the
 development version of 'ggplot2'.
 
--   Track code breaking change in 'ggplot2' commit \#2620 (2018-05-17).
+-   Track code breaking change in 'ggplot2' commit #2620 (2018-05-17).
 
 # ggpmisc 0.2.17.9900
 
 Non-CRAN version with additional functionality, but requiring the
-development version of 'ggplot2' \>= 2.2.1.9000 (\>= commit of
+development version of 'ggplot2' \>= 2.2.1.9000 (>= commit of
 2017-02-09) from Github. Visit
 
 -   `geom_table()`, a geom for adding a layer containing one or more
@@ -359,7 +410,7 @@ CRAN version
 
 Add `stat_fit_tidy()` implemented using `broom::tidy()`. Makes it
 possible to add the fitted equation for any fitted model supported by
-package 'broom', as long as the user supplies within aes() the code to
+package 'broom', as long as the user supplies within `aes()` the code to
 build a label string. Update user guide.
 
 # ggpmisc 0.2.14
@@ -443,10 +494,10 @@ expressions.
     observations from a fitted model.
 
 -   Add `stat_fit_residuals()` for plotting residuals from a fitted
-    model on their own in plots matching plots of lm fits plotted with
-    stat_smooth() even with grouping or facets. This statistic currently
-    supports only `lm()` fits. By default geom "point" is used to plot
-    the residual from a fitted model.
+    model on their own in plots matching plots of `lm` fits plotted with
+    `stat_smooth()` even with grouping or facets. This statistic
+    currently supports only `lm()` fits. By default geom "point" is used
+    to plot the residual from a fitted model.
 
 -   Add preliminary version of `stat_fit_augment()`, which uses package
     'broom' for maximum flexibility in model function choice, to augment
@@ -458,9 +509,9 @@ expressions.
 -   Add pretty-printing of parameter values expressed in engineering
     notation in `stat_poly_eq()`.
 -   Add support for user-supplied label coordinates in `stat_poly_eq()`.
--   Improve `stat_debug_panel()` and stat_debug_group() so that they can
-    optionally print to the console a summary of the data received as
-    input.
+-   Improve `stat_debug_panel()` and `stat_debug_group()` so that they
+    can optionally print to the console a summary of the data received
+    as input.
 -   Add `geom_debug()`, a geom that summarizes its data input to the
     console, and produces no visible graphical output.
 
@@ -485,7 +536,7 @@ expressions.
 
 # ggpmisc 0.2.2
 
--   Add function try_data_frame() to convert R objects including time
+-   Add function `try_data_frame()` to convert R objects including time
     series objects of all classes accepted by `try.xts()` into data
     frames suitable for plotting with `ggplot()`.
 

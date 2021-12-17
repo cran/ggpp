@@ -11,6 +11,10 @@ geom_grob(
   stat = "identity",
   position = "identity",
   ...,
+  nudge_x = 0,
+  nudge_y = 0,
+  add.segments = TRUE,
+  arrow = NULL,
   na.rm = FALSE,
   show.legend = FALSE,
   inherit.aes = FALSE
@@ -29,8 +33,8 @@ geom_grob_npc(
 }
 \arguments{
 \item{mapping}{The aesthetic mapping, usually constructed with
-\code{\link[ggplot2]{aes}} or \code{\link[ggplot2]{aes_}}. Only needs
-to be set at the layer level if you are overriding the plot defaults.}
+\code{\link[ggplot2]{aes}} or \code{\link[ggplot2]{aes_}}. Only needs to be
+set at the layer level if you are overriding the plot defaults.}
 
 \item{data}{A layer specific dataset - only needed if you want to override
 the plot defaults.}
@@ -44,6 +48,16 @@ call to a position adjustment function.}
 \item{...}{other arguments passed on to \code{\link[ggplot2]{layer}}. This
 can include aesthetics whose values you want to set, not map. See
 \code{\link[ggplot2]{layer}} for more details.}
+
+\item{nudge_x, nudge_y}{Horizontal and vertical adjustments to nudge the
+starting position of each text label. The units for \code{nudge_x} and
+\code{nudge_y} are the same as for the data units on the x-axis and y-axis.}
+
+\item{add.segments}{logical Display connecting segments or arrows between
+original positions and displaced ones if both are available.}
+
+\item{arrow}{specification for arrow heads, as created by
+\code{\link[grid]{arrow}}}
 
 \item{na.rm}{If \code{FALSE} (the default), removes missing values with a
 warning.  If \code{TRUE} silently removes missing values.}
@@ -61,63 +75,87 @@ default plot specification, e.g. \code{\link[ggplot2]{borders}}.}
 A plot layer instance.
 }
 \description{
-\code{geom_grob} and \code{geom_grob_npc} add a Grob as inset to the ggplot
-using syntax similar to that of \code{\link[ggplot2]{geom_label}}.In most
-respects they behave as any other ggplot geometry: a layer con contain
-multiple tables and faceting works as usual.
+\code{geom_grob} and \code{geom_grob_npc} add Grobs as insets to the ggplot
+using syntax similar to that of \code{\link[ggplot2]{geom_text}} and
+\code{\link{geom_text_s}}. In most respects they behave as any other ggplot
+geometry: ther add a layer containing one or more grobs and faceting works as
+usual.
 }
 \details{
-The "width" and "height" of an inset as for a text element are
-  0, so stacking and dodging inset plots will not work by default, and axis
-  limits are not automatically expanded to include all inset plots.
-  Obviously, insets do have height and width, but they are physical units,
-  not data units. The amount of space they occupy on the main plot is not
-  constant in data units of the base plot: when you modify scale limits,
-  inset plots stay the same size relative to the physical size of the base
-  plot.
-}
-\note{
-These geoms work only with tibbles as \code{data}, as they expects a list
-  of graphics objects ("grob") to be mapped to the \code{label} aesthetic.
-  Aesthetics mappings in the inset plot are independent of those in the base
-  plot.
-
-  In the case of \code{geom_grob()}, \code{x} and \code{y} aesthetics
-  determine the position of the whole inset grob, similarly to that of a text
-  label, justification is interpreted as indicating the position of the grob
-  with respect to the $x$ and $y$ coordinates in the data, and \code{angle}
-  is used to rotate the plot as a whole.
-
-  In the case of \code{geom_grob_npc()}, \code{npcx} and \code{npcy} aesthetics
-  determine the position of the whole inset plot, similarly to that of a text
-  label, justification is interpreted as indicating the position of the grob
-  with respect to the $x$ and $y$ coordinates in "npc" units, and \code{angle}
-  is used to rotate the plot as a whole.
-
-  \strong{\code{annotate()} cannot be used with \code{geom = "grob"}}. Use
-  \code{\link[ggplot2]{annotation_custom}} directly when adding inset plots
-  as annotations.
-}
-\section{Alignment}{
- You can modify table alignment with the \code{vjust} and
-  \code{hjust} aesthetics. These can either be a number between 0
+You can modify the alignment of inset grobs with the \code{vjust}
+  and \code{hjust} aesthetics. These can either be a number between 0
   (right/bottom) and 1 (top/left) or a character ("left", "middle", "right",
   "bottom", "center", "top").
-}
 
-\section{Inset size}{
- You can modify inset plot size with the \code{vp.width}
-  and \code{vp.height} aesthetics. These can be a number between 0 (smallest
-  posisble inset) and 1 (whole plotting area width or height). The default
-  value for for both of these aesthetics is 1/3.
-}
+  You can modify the size of inset grobs with the \code{vp.width} and
+  \code{vp.height} aesthetics. These can take a number between 0 (smallest
+  possible inset) and 1 (whole plotting area width or height). The default
+  value for for both of these aesthetics is 1/5. Thus, in contrast to
+  \code{\link[ggplot2]{geom_text}} and \code{\link{geom_text_s}} the size of
+  the insets remains the same relative to the size of the plotting area
+  irrespective of how the plot is rendered. The aspect ratio of insets is
+  preserved and size is adjusted until the whole inset fits within the
+  viewport.
 
+  You can modify inset grob alignment with the `vjust` and `hjust`
+  aesthetics. These can either be a number between 0 (right/bottom) and 1
+  (top/left) or a character (`"left"`, `"middle"`, `"right"`, `"bottom"`,
+  `"center"`, `"top"`). There several two special alignments: `"inward"` and
+  `"outward"`. Inward always aligns text towards the center of the plotting
+  area, and outward aligns it away from the center of the plotting area. It
+  tagged with `_mean` or `_median` the mean or median of the data in the
+  panel along the corresponding axis is used as center.
+
+  By default this geom uses \code{\link{position_nudge_center}} which is
+  backwards compatible with \code{\link[ggplot2]{position_nudge}} but
+  provides additional control on the direction of the nudging. In contrast to
+  \code{\link[ggplot2]{position_nudge}}, \code{\link{position_nudge_center}}
+  and all other position functions defined in packages 'ggpp' and 'ggrepel'
+  keep the original coordinates thus allowing the plotting of connecting
+  segments and arrows.
+
+  This geom works only with tibbles as \code{data}, as its expects a list of
+  graphics objects ("grob") to be mapped to the \code{label} aesthetic.
+
+  The \code{x} and \code{y} aesthetics determine the position of the whole
+  inset grob, similarly to that of a text label, justification is interpreted
+  as indicating the position of the grob with respect to its $x$ and $y$
+  coordinates in the data, and \code{angle} is used to rotate the grob as a
+  whole.
+
+  In the case of \code{geom_grob_npc()}, \code{npcx} and \code{npcy}
+  aesthetics determine the position of the inset grob. As for text labels,
+  justification is interpreted as indicating the position of the grob with
+  respect to the x and y coordinates in "npc" units, and \code{angle} is used
+  to rotate the plot as a whole.
+
+  \code{\link[ggplot2]{annotate}} cannot be used with \code{geom = "grob"}.
+  Use \code{\link{annotate}} (automatic unless 'ggpp' is not attached) as
+  redefined in 'ggpp' when adding inset grobs as annotations (automatic
+  unless 'ggpp' is not attached).
+}
 \examples{
 library(tibble)
 df <- tibble(x = 2, y = 15, grob = list(grid::circleGrob(r = 0.2)))
+
+# without nudging no segments are drawn
 ggplot(data = mtcars, aes(wt, mpg)) +
   geom_point(aes(colour = factor(cyl))) +
   geom_grob(data = df, aes(x, y, label = grob))
+
+# with nudging segments are drawn
+ggplot(data = mtcars, aes(wt, mpg)) +
+  geom_point(aes(colour = factor(cyl))) +
+  geom_grob(data = df, aes(x, y, label = grob),
+            nudge_x = 0.5,
+            segment.colour = "red")
+
+# with nudging plotting of segments can be disabled
+ggplot(data = mtcars, aes(wt, mpg)) +
+  geom_point(aes(colour = factor(cyl))) +
+  geom_grob(data = df, aes(x, y, label = grob),
+            add.segments = FALSE,
+            nudge_x = 0.5)
 
 }
 \references{
@@ -126,6 +164,11 @@ The idea of implementing a \code{geom_custom()} for grobs has
   \url{https://github.com/tidyverse/ggplot2/issues/1399}.
 }
 \seealso{
+\code{\link{geom_plot}}, \code{\link{geom_table}},
+  \code{\link{annotate}}, \code{\link{position_nudge_keep}},
+  \code{\link{position_nudge_to}}, \code{\link{position_jitternudge}},
+  \code{\link{position_dodgenudge}} and \code{\link{position_stacknudge}}.
+
 Other geometries adding layers with insets: 
 \code{\link{geom_plot}()},
 \code{\link{geom_table}()}

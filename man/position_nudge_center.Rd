@@ -12,7 +12,8 @@ position_nudge_center(
   center_x = NULL,
   center_y = NULL,
   direction = NULL,
-  obey_grouping = NULL
+  obey_grouping = NULL,
+  kept.origin = "original"
 )
 
 position_nudge_centre(
@@ -21,7 +22,8 @@ position_nudge_centre(
   center_x = NULL,
   center_y = NULL,
   direction = NULL,
-  obey_grouping = NULL
+  obey_grouping = NULL,
+  kept.origin = "original"
 )
 
 position_nudge_keep(x = 0, y = 0)
@@ -44,6 +46,8 @@ values is the default depends on the values passed to the other parameters.}
 of the observations. By default, grouping is obeyed when both of the
 variables mapped to _x_ and _y_ are continuous numeric and ignored
 otherwise.}
+
+\item{kept.origin}{One of "original" or "none".}
 }
 \value{
 A \code{"Position"} object.
@@ -255,7 +259,10 @@ ggplot(df, aes(x, z, color = group)) +
 [ggplot2::position_nudge()], [ggrepel::position_nudge_repel()].
 
 Other position adjustments: 
+\code{\link{position_dodgenudge}()},
+\code{\link{position_jitternudge}()},
 \code{\link{position_nudge_line}()},
-\code{\link{position_nudge_to}()}
+\code{\link{position_nudge_to}()},
+\code{\link{position_stacknudge}()}
 }
 \concept{position adjustments}

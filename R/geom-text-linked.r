@@ -1,44 +1,48 @@
 #' @title Linked Text
 #'
-#' @description Text geoms are useful for labelling plots. `geom_text_linked()`
+#' @description Text geoms are most useful for labelling plots. `geom_text_s()`
 #'   adds text to the plot and for nudged positions links the original location
 #'   to the nudged text with a segment.
 #'
-#' @section Under development:
-#'   This is a very simple and preliminary version of a geom. I plan to add
-#'   features like padding around text and points. I aim to make use of the new
-#'   features of 'grid' in R >= 4.1.0 to keep the implementation as fast and
-#'   simple as possible. Currently this geom does all drawing using at most two
-#'   vectorized calls to 'grid' functions. As a temporary replacement of padding
-#'   around text one can use 'slightly out-of-range' numeric values for
-#'   justification as shown in the examples.
+#' @section Under development: This is preliminary version of the geom. I plan
+#'   to add features like padding around text and points. I aim to make use of
+#'   the new features of 'grid' in R >= 4.1.0 to keep the implementation as fast
+#'   and simple as possible. Currently this geom does all drawing using at most
+#'   two vectorized calls to 'grid' functions. As a temporary replacement of
+#'   padding around text one can use 'slightly out-of-range' numeric values for
+#'   justification as shown in the examples. Aesthetics `segment.colour` and
+#'   `segment.alpha` are implemented, but `segment.linetype` not yet.
 #'
-#' @details Note that when you resize a plot, text labels stay the same size,
-#'   even though the size of the plot area changes. This happens because the
-#'   "width" and "height" of a text element are 0. Obviously, text labels do
-#'   have height and width, but they are physical units, not data units. For the
-#'   same reason, stacking and dodging text will not work by default, and axis
-#'   limits are not automatically expanded to include all text.
+#' @details Note that when you change the scale limits for x and/or y of a plot,
+#'   text labels stay the same size, as determined by the \code{size} aesthetic.
+#'   The actual size as seen in the plotted output is decided during the
+#'   rendering of the plot to a graphics device. Limits are expanded only to
+#'   include the anchor point of the labels because the "width" and "height" of
+#'   a text element are 0 (as seen by ggplot2). For the same reason, stacking
+#'   and dodging text will not work as they take place within 'ggplot2' before
+#'   the rendered size of text is known. Text labels do have height and width,
+#'   but in grid units, not data units.
 #'
-#'   By default this geom uses `position_nudge_center()` which is backwards
-#'   compatible with `position_nudge()` from 'ggplot2' but provides additional
-#'   control on the direction of the nudging. In contrast to `position_nudge()`,
-#'   `position_nudge_center()` and `position_nudge_line()` preserve the original
-#'   coordinates.
+#'   By default this geom uses \code{\link{position_nudge_center}} which is
+#'   backwards compatible with \code{\link[ggplot2]{position_nudge}} but
+#'   provides additional control on the direction of the nudging. In contrast to
+#'   \code{\link[ggplot2]{position_nudge}}, \code{\link{position_nudge_center}}
+#'   and all other position functions defined in packages 'ggpp' and 'ggrepel'
+#'   keep the original coordinates thus allowing the plotting of connecting
+#'   segments and arrows.
 #'
 #' @section Alignment: You can modify text alignment with the `vjust` and
 #'   `hjust` aesthetics. These can either be a number between 0 (right/bottom)
 #'   and 1 (top/left) or a character (`"left"`, `"middle"`, `"right"`,
-#'   `"bottom"`, `"center"`, `"top"`). There seevral two special alignments:
+#'   `"bottom"`, `"center"`, `"top"`). There several two special alignments:
 #'   `"inward"` and `"outward"`. Inward always aligns text towards the center of
 #'   the plotting area, and outward aligns it away from the center of the
 #'   plotting area. It tagged with `_mean` or `_median` the mean or median of
 #'   the data in the panel along the corresponding axis is used as center.
 #'
-#' @param mapping Set of aesthetic mappings created by
-#'   \code{\link[ggplot2]{aes}} or \code{\link[ggplot2]{aes_}}. If specified and
-#'   \code{inherit.aes = TRUE} (the default), is combined with the default
-#'   mapping at the top level of the plot. You only need to supply
+#' @param mapping Set of aesthetic mappings created by [ggplot2::aes]. If
+#'   specified and \code{inherit.aes = TRUE} (the default), is combined with the
+#'   default mapping at the top level of the plot. You only need to supply
 #'   \code{mapping} if there isn't a mapping defined for the plot.
 #' @param data A data frame. If specified, overrides the default data frame
 #'   defined at the top level of the plot.
@@ -71,10 +75,15 @@
 #' @param nudge_x,nudge_y Horizontal and vertical adjustments to nudge the
 #'   starting position of each text label. The units for \code{nudge_x} and
 #'   \code{nudge_y} are the same as for the data units on the x-axis and y-axis.
+#' @param add.segments logical Display connecting segments or arrows between
+#'   original positions and displaced ones if both are available.
 #' @param arrow specification for arrow heads, as created by
 #'   \code{\link[grid]{arrow}}
 #'
 #' @return A plot layer instance.
+#'
+#' @note You can alternatively use \code{\link[ggrepel]{geom_label_repel}},
+#'   possibly setting `max.iter = 0` to disable repulsion when needed.
 #'
 #' @export
 #'
@@ -85,148 +94,112 @@
 #' p <- ggplot(my.cars, aes(wt, mpg, label = name))
 #'
 #' # default behavior is as for geon_text()
-#' p + geom_text_linked()
+#' p + geom_text_s()
 #' # Avoid overlaps
-#' p + geom_text_linked(check_overlap = TRUE)
+#' p + geom_text_s(check_overlap = TRUE)
 #' # Change size of the label
-#' p + geom_text_linked(size = 2.5)
+#' p + geom_text_s(size = 2.5)
+#'
+#' # default behavior is as for geon_label()
+#' p + geom_label_s()
+#' # Change size of the label
+#' p + geom_label_s(size = 2.5)
 #'
 #' # Use nudging
 #' p +
 #'   geom_point() +
-#'   geom_text_linked(hjust = -0.04, nudge_x = 0.12) +
+#'   geom_text_s(hjust = -0.04, nudge_x = 0.12) +
 #'   expand_limits(x = 6.2)
 #' p +
 #'   geom_point() +
-#'   geom_text_linked(hjust = -0.04, nudge_x = 0.12,
+#'   geom_text_s(hjust = -0.04, nudge_x = 0.12,
 #'   arrow = arrow(length = grid::unit(1.5, "mm"))) +
 #'   expand_limits(x = 6.2)
 #' p +
 #'   geom_point() +
-#'   geom_text_linked(vjust = -0.5, nudge_y = 0.5)
+#'   geom_text_s(vjust = -0.5, nudge_y = 0.5)
 #' p +
 #'   geom_point() +
-#'   geom_text_linked(hjust = -0.02, nudge_x = 0.1,
-#'                    vjust = -0.2, nudge_y = 0.5)
+#'   geom_text_s(angle = 90,
+#'               hjust = -0.04, nudge_y = 1,
+#'               arrow = arrow(length = grid::unit(1.5, "mm")),
+#'               segment.colour = "red") +
+#'   expand_limits(y = 30)
+#'
 #' p +
 #'   geom_point() +
-#'   geom_text_linked(angle = 90,
-#'                    hjust = -0.04, nudge_y = 1,
-#'                    arrow = arrow(length = grid::unit(1.5, "mm"))) +
+#'   geom_label_s(hjust = 0, nudge_x = 0.12) +
+#'   expand_limits(x = 6.2)
+#'
+#' # Add aesthetic mappings and adjust arrows
+#' p +
+#'   geom_point() +
+#'   geom_text_s(aes(colour = factor(cyl)),
+#'               segment.colour = "black",
+#'               angle = 90,
+#'               hjust = -0.04, nudge_y = 1,
+#'               arrow = arrow(angle = 20,
+#'                             length = grid::unit(1.5, "mm"),
+#'                             ends = "first",
+#'                             type = "closed"),
+#'               show.legend = FALSE) +
+#'   scale_colour_discrete(l = 40) + # luminance, make colours darker
 #'   expand_limits(y = 40)
 #'
-#' # Add aesthetic mappings
+#' # Add aesthetic mappings and adjust arrows
 #' p +
 #'   geom_point() +
-#'   geom_text_linked(aes(colour = factor(cyl)),
-#'                    angle = 90,
-#'                    hjust = -0.04, nudge_y = 1,
-#'                    arrow = arrow(length = grid::unit(1.5, "mm"))) +
-#'   scale_colour_discrete(l = 40) +
-#'   expand_limits(y = 40)
+#'   geom_label_s(aes(colour = factor(cyl)),
+#'               hjust = 0, nudge_x = 0.3,
+#'               arrow = arrow(angle = 20,
+#'                             length = grid::unit(2/3, "lines"))) +
+#'   scale_colour_discrete(l = 40) + # luminance, make colours darker
+#'   expand_limits(x = 7)
 #'
-#' p + geom_text_linked(aes(size = wt)) +
-#'     expand_limits(x = c(2, 6))
 #' # Scale height of text, rather than sqrt(height)
 #' p +
-#'   geom_text_linked(aes(size = wt)) +
-#'   scale_radius(range = c(3,6)) +
-#'     expand_limits(x = c(2, 6))
+#'   geom_point() +
+#'   geom_text_s(aes(size = wt), nudge_x = -0.1, hjust = "right") +
+#'   scale_radius(range = c(3,6)) + # override scale_area()
+#'     expand_limits(x = c(1.8, 5.5))
 #'
-#' # You can display expressions by setting parse = TRUE.  The
-#' # details of the display are described in ?plotmath, but note that
-#' # geom_text_linked uses strings, not expressions.
-#' p +
-#'   geom_text_linked(
-#'     aes(label = paste(wt, "^(", cyl, ")", sep = "")),
-#'     parse = TRUE
-#'   )
-#'
-#' # Add a text annotation
-#' p +
-#'   geom_text_linked() +
-#'   annotate(
-#'     "text_linked", label = "plot mpg vs. wt",
-#'     x = 2, y = 15, size = 3, colour = "red"
-#'   )  +
-#'  expand_limits(x = c(1.5, 6))
-#'
-#' # Justification -------------------------------------------------------------
-#' df <- data.frame(
-#'   x = c(1, 1, 2, 2, 1.5),
-#'   y = c(1, 2, 1, 2, 1.5),
-#'   text = c("bottom-left", "bottom-right", "top-left", "top-right", "center")
-#' )
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text))
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward", hjust = "inward")
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), hjust = "inward", angle = 33)
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), hjust = "inward", angle = 66)
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), hjust = "inward", angle = 90)
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward", hjust = "inward", angle = 33)
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward", hjust = "inward", angle = 66)
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward", hjust = "inward", angle = 90)
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward_1.5", hjust = "inward_1.5")
-#' ggplot(df, aes(x - 1.5, y - 1.5)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward_0.0", hjust = "inward_0.0")
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward_mean", hjust = "inward_mean")
-#' ggplot(df, aes(x - 1.5, y - 1.5)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward_mean", hjust = "inward_mean")
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "inward_median", hjust = "inward_median")
-#'
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "outward", hjust = "outward")
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "outward_mean", hjust = "outward_mean")
-#' ggplot(df, aes(x - 1.5, y - 1.5)) +
-#'   geom_text_linked(aes(label = text), vjust = "outward_mean", hjust = "outward_mean")
-#' ggplot(df, aes(x, y)) +
-#'   geom_text_linked(aes(label = text), vjust = "outward_median", hjust = "outward_median")
-#' ggplot(df, aes(x - 1.5, y - 1.5)) +
-#'   geom_text_linked(aes(label = text), vjust = "outward_median", hjust = "outward_median")
-#'
-geom_text_linked <- function(mapping = NULL,
-                             data = NULL,
-                             stat = "identity",
-                             position = "identity",
-                             ...,
-                             parse = FALSE,
-                             nudge_x = 0,
-                             nudge_y = 0,
-                             arrow = NULL,
-                             check_overlap = FALSE,
-                             na.rm = FALSE,
-                             show.legend = NA,
-                             inherit.aes = TRUE)
+geom_text_s <- function(mapping = NULL,
+                        data = NULL,
+                        stat = "identity",
+                        position = "identity",
+                        ...,
+                        parse = FALSE,
+                        nudge_x = 0,
+                        nudge_y = 0,
+                        add.segments = TRUE,
+                        arrow = NULL,
+                        check_overlap = FALSE,
+                        na.rm = FALSE,
+                        show.legend = NA,
+                        inherit.aes = TRUE)
 {
   if (!missing(nudge_x) || !missing(nudge_y)) {
     if (!missing(position)) {
       rlang::abort("You must specify either `position` or `nudge_x`/`nudge_y`.")
     }
-
-    position <- position_nudge_center(nudge_x, nudge_y)
+    # We do not keep the original positions if they will not be used
+    position <-
+      position_nudge_center(nudge_x, nudge_y,
+                            kept.origin = ifelse(add.segments,
+                                                 "original", "none"))
   }
 
   ggplot2::layer(
     data = data,
     mapping = mapping,
     stat = stat,
-    geom = GeomTextLinked,
+    geom = GeomTextS,
     position = position,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
       parse = parse,
+      add.segments = add.segments,
       arrow = arrow,
       nudge_x = nudge_x,
       nudge_y = nudge_y,
@@ -241,112 +214,117 @@ geom_text_linked <- function(mapping = NULL,
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomTextLinked <-
-  ggplot2::ggproto("GeomTextLinked", ggplot2::Geom,
-                    required_aes = c("x", "y", "label"),
+GeomTextS <-
+  ggplot2::ggproto("GeomTextS", ggplot2::Geom,
+                   required_aes = c("x", "y", "label"),
 
-                    default_aes = ggplot2::aes(
-                      colour = "black",
-                      size = 3.88,
-                      angle = 0,
-                      hjust = 0.5,
-                      vjust = 0.5,
-                      alpha = NA,
-                      family = "",
-                      fontface = 1,
-                      lineheight = 1.2,
-                      segment.linetype = 1,
-                      segment.colour = NULL,
-                      segment.size = 0.5,
-                      segment.alpha = NULL
-                    ),
+                   default_aes = ggplot2::aes(
+                     colour = "black",
+                     size = 3.88,
+                     angle = 0,
+                     hjust = 0.5,
+                     vjust = 0.5,
+                     alpha = NA,
+                     family = "",
+                     fontface = 1,
+                     lineheight = 1.2,
+                     segment.linetype = 1,
+                     segment.colour = "grey33",
+                     segment.size = 0.5,
+                     segment.alpha = 1
+                   ),
 
-                    draw_panel = function(data, panel_params, coord, #panel_scales,
-                                          parse = FALSE,
-                                          na.rm = FALSE, check_overlap = FALSE,
-                                          arrow = NULL,
-                                          nudge_x = 0,
-                                          nudge_y = 0) {
+                   draw_panel = function(data,
+                                         panel_params,
+                                         coord, #panel_scales,
+                                         parse = FALSE,
+                                         na.rm = FALSE,
+                                         check_overlap = FALSE,
+                                         add.segments = TRUE,
+                                         arrow = NULL,
+                                         nudge_x = 0,
+                                         nudge_y = 0) {
 
-                      add.links <- all(c("x_orig", "y_orig") %in% colnames(data))
+                     add.segments <- add.segments && all(c("x_orig", "y_orig") %in% colnames(data))
 
-                      data$label <- as.character(data$label)
-                      data <- subset(data, !is.na(label) & label != "")
-                      if (nrow(data) == 0L) {
-                        return(nullGrob())
-                      }
+                     data$label <- as.character(data$label)
+                     data <- subset(data, !is.na(label) & label != "")
+                     if (nrow(data) == 0L) {
+                       return(nullGrob())
+                     }
 
-                      lab <- data$label
-                      if (parse) {
-                        lab <- parse_safe(lab)
-                      }
+                     lab <- data$label
+                     if (parse) {
+                       lab <- parse_safe(lab)
+                     }
 
-                      data <- coord$transform(data, panel_params)
-                      if (add.links) {
-                        data_orig <- data.frame(x = data$x_orig, y = data$y_orig)
-                        data_orig <- coord$transform(data_orig, panel_params)
-                      }
+                     data <- coord$transform(data, panel_params)
+                     if (add.segments) {
+                       data_orig <- data.frame(x = data$x_orig, y = data$y_orig)
+                       data_orig <- coord$transform(data_orig, panel_params)
+                       data$x_orig <- data_orig$x
+                       data$y_orig <- data_orig$y
+                     }
 
-                      if (is.character(data$vjust)) {
-                        data$vjust <-
-                          compute_just2d(data = data,
-                                         coord = coord,
-                                         panel_params = panel_params,
-                                         just = data$vjust,
-                                         a = "y", b = "x")
-                      }
-                      if (is.character(data$hjust)) {
-                        data$hjust <-
-                          compute_just2d(data = data,
-                                         coord = coord,
-                                         panel_params = panel_params,
-                                         just = data$hjust,
-                                         a = "x", b = "y")
-                      }
+                     if (is.character(data$vjust)) {
+                       data$vjust <-
+                         compute_just2d(data = data,
+                                        coord = coord,
+                                        panel_params = panel_params,
+                                        just = data$vjust,
+                                        a = "y", b = "x")
+                     }
+                     if (is.character(data$hjust)) {
+                       data$hjust <-
+                         compute_just2d(data = data,
+                                        coord = coord,
+                                        panel_params = panel_params,
+                                        just = data$hjust,
+                                        a = "x", b = "y")
+                     }
 
-                      if(add.links) {
-                        # create the grobs
-                        grid::grobTree(
-                          grid::segmentsGrob(
-                            x0 = data$x,
-                            y0 = data$y,
-                            x1 = data_orig$x,
-                            y1 = data_orig$y,
-                            arrow = arrow,
-                            gp = grid::gpar(col =
-                                              alpha(data$colour,
-                                                    data$alpha))),
-                          grid::textGrob(
-                            lab,
-                            data$x, data$y, default.units = "native",
-                            hjust = data$hjust, vjust = data$vjust,
-                            rot = data$angle,
-                            gp = gpar(
-                              col = alpha(data$colour, data$alpha),
-                              fontsize = data$size * .pt,
-                              fontfamily = data$family,
-                              fontface = data$fontface,
-                              lineheight = data$lineheight
-                            ),
-                            check.overlap = check_overlap
-                          ))
-                      } else {
-                        grid::textGrob(
-                          lab,
-                          data$x, data$y, default.units = "native",
-                          hjust = data$hjust, vjust = data$vjust,
-                          rot = data$angle,
-                          gp = gpar(
-                            col = alpha(data$colour, data$alpha),
-                            fontsize = data$size * .pt,
-                            fontfamily = data$family,
-                            fontface = data$fontface,
-                            lineheight = data$lineheight
-                          ),
-                          check.overlap = check_overlap
-                        )
-                      }
-                    },
+                     # loop needed as gpar is not vectorized
+                     all.grobs <- grid::gList()
+
+                     for (row.idx in 1:nrow(data)) {
+                       row <- data[row.idx, , drop = FALSE]
+                       user.grob <- grid::textGrob(
+                         lab[row.idx],
+                         row$x, row$y, default.units = "native",
+                         hjust = row$hjust, vjust = row$vjust,
+                         rot = row$angle,
+                         gp = gpar(
+                           col = ggplot2::alpha(row$colour, row$alpha),
+                           fontsize = row$size * .pt,
+                           fontfamily = row$family,
+                           fontface = row$fontface,
+                           lineheight = row$lineheight
+                         ),
+                         check.overlap = check_overlap
+                       )
+
+                       # give unique name to each grob
+                       user.grob$name <- paste("text.s.grob", row.idx, sep = ".")
+
+                       if (add.segments) {
+                         segment.grob <-
+                           grid::segmentsGrob(x0 = row$x,
+                                              y0 = row$y,
+                                              x1 = row$x_orig,
+                                              y1 = row$y_orig,
+                                              arrow = arrow,
+                                              gp = grid::gpar(col = ggplot2::alpha(row$segment.colour,
+                                                                                   row$segment.alpha)),
+                                              name = paste("text.s.segment", row.idx, sep = "."))
+                         all.grobs <- grid::gList(all.grobs, segment.grob, user.grob)
+                       } else {
+                         all.grobs <- grid::gList(all.grobs, user.grob)
+                       }
+                     }
+
+                     grid::grobTree(children = all.grobs, name = "geom.text.s.panel")
+
+                   },
 
                    draw_key = draw_key_text
   )

@@ -3,15 +3,17 @@
 #' `position_nudge_to()` is generally useful for adjusting the position of
 #' labels or text, both on a discrete or continuous scale. This version from
 #' package 'ggpmisc' differs from [ggplot2::position_nudge] in that the
-#' coordinates of the new position is given directly, rather than as a
+#' coordinates of the new position are given directly, rather than as a
 #' displacement from the original location. As other position functions in
 #' this package, it preserves the original position to allow the text to
 #' be linked back to its original position with a segment or arrow.
 #'
 #' @family position adjustments
+#'
 #' @param x,y Coordinates of the destination position. A numeric
 #'   vector of length 1, or of the same length as rows there are in `data`.
 #'   The default, `NULL`, leaves the original coordinates unchanged.
+#' @param kept.origin One of "original" or "none".
 #'
 #' @details The new `x` or `y` replace the original ones, while the original
 #'   coordinates are returned in `x_orig` and `y_orig`.
@@ -36,15 +38,24 @@
 #'
 #' ggplot(df, aes(x, y, label = label)) +
 #'   geom_point() +
-#'   geom_text_linked(position = position_nudge_to(y = 3),
+#'   geom_text_s(position = position_nudge_to(y = 3),
 #'                    vjust = -0.2)
 #'
 position_nudge_to <-
   function(x = NULL,
-           y = NULL) {
+           y = NULL,
+           kept.origin = "original") {
+
+    # Ensure error message is triggered early
+    if (!kept.origin %in% c("original", "none")) {
+      stop("Invalid 'kept.origin': ", kept.origin,
+           "expected: `\"original\" or \"none\"")
+    }
+
     ggplot2::ggproto(NULL, PositionNudgeTo,
                      x = x,
-                     y = y
+                     y = y,
+                     kept.origin = kept.origin
     )
   }
 
@@ -62,7 +73,9 @@ PositionNudgeTo <-
     setup_params = function(self, data) {
 
       list(x = self$x,
-           y = self$y)
+           y = self$y,
+           kept.origin = self$kept.origin
+      )
     },
 
     compute_layer = function(self, data, params, layout) {
@@ -98,8 +111,11 @@ PositionNudgeTo <-
         data <- transform_position(data, NULL, function(y) y + params$y)
       }
       # add original position
-      data$x_orig <- x_orig
-      data$y_orig <- y_orig
+      if (params$kept.origin == "original") {
+        data$x_orig <- x_orig
+        data$y_orig <- y_orig
+      }
+
       data
     }
   )

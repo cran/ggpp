@@ -12,7 +12,8 @@ position_nudge_line(
   method = NULL,
   formula = y ~ x,
   direction = NULL,
-  line_nudge = 1
+  line_nudge = 1,
+  kept.origin = "original"
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ otherwise.}
 
 \item{line_nudge}{A positive multiplier >= 1, increasing nudging
 away from the curve or line compared to nudging from points.}
+
+\item{kept.origin}{One of "original" or "none".}
 }
 \value{
 A \code{"Position"} object.
@@ -244,7 +247,10 @@ ggplot(df, aes(x, y, label = l)) +
 [ggplot::position_nudge()], [ggrepel::position_nudge_repel()].
 
 Other position adjustments: 
+\code{\link{position_dodgenudge}()},
+\code{\link{position_jitternudge}()},
 \code{\link{position_nudge_center}()},
-\code{\link{position_nudge_to}()}
+\code{\link{position_nudge_to}()},
+\code{\link{position_stacknudge}()}
 }
 \concept{position adjustments}

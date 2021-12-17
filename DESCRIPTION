@@ -1,21 +1,23 @@
 Package: ggpp
 Type: Package
 Title: Grammar Extensions to 'ggplot2'
-Version: 0.4.2
-Date: 2021-07-30
+Version: 0.4.3
+Date: 2021-12-16
 Authors@R: 
     c(
     person("Pedro J.", "Aphalo", email = "pedro.aphalo@helsinki.fi", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3385-972X")),
-    person("Kamil", "Slowikowski", role = "ctb")
+    person("Kamil", "Slowikowski", role = "ctb", comment = c(ORCID = "0000-0002-2843-6370")),
+    person("Michał", "Krassowski", role = "ctb", comment = c(ORCID = "0000-0002-9638-7785"))
     )
 Maintainer: Pedro J. Aphalo <pedro.aphalo@helsinki.fi>
 Description: Extensions to 'ggplot2' respecting the grammar of graphics 
-    paradigm. Geomas: geom_table(), geom_plot() and geom_grob() add insets to 
+    paradigm. Geometries: geom_table(), geom_plot() and geom_grob() add insets to 
     plots using native data coordinates, while geom_table_npc(), geom_plot_npc()
     and geom_grob_npc() do the same using "npc" coordinates through new 
     aesthetics "npcx" and "npcy". Statistics: select observations based on 2D 
     density. Positions: radial nudging away from a center point and nudging away
-    from a line or curve.
+    from a line or curve; combined stacking and nudging; combined dodging and
+    nudging.
 License: GPL (>= 2)
 LazyLoad: TRUE
 ByteCompile: TRUE
@@ -31,11 +33,12 @@ URL: https://docs.r4photobiology.info/ggpp/,
         https://github.com/aphalo/ggpp
 BugReports: https://github.com/aphalo/ggpp/issues
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-07-30 21:05:44 UTC; Aphalo
+Packaged: 2021-12-17 09:30:20 UTC; Aphalo
 Author: Pedro J. Aphalo [aut, cre] (<https://orcid.org/0000-0003-3385-972X>),
-  Kamil Slowikowski [ctb]
+  Kamil Slowikowski [ctb] (<https://orcid.org/0000-0002-2843-6370>),
+  Michał Krassowski [ctb] (<https://orcid.org/0000-0002-9638-7785>)
 Repository: CRAN
-Date/Publication: 2021-07-31 04:30:10 UTC
+Date/Publication: 2021-12-17 18:40:02 UTC
