@@ -18,6 +18,9 @@ geom_label_s(
   label.r = grid::unit(0.15, "lines"),
   label.size = 0.25,
   add.segments = TRUE,
+  box.padding = 0.25,
+  point.padding = 1e-06,
+  min.segment.length = 0,
   arrow = NULL,
   na.rm = FALSE,
   show.legend = NA,
@@ -34,6 +37,9 @@ geom_text_s(
   nudge_x = 0,
   nudge_y = 0,
   add.segments = TRUE,
+  box.padding = 0.25,
+  point.padding = 1e-06,
+  min.segment.length = 0,
   arrow = NULL,
   check_overlap = FALSE,
   na.rm = FALSE,
@@ -42,10 +48,11 @@ geom_text_s(
 )
 }
 \arguments{
-\item{mapping}{Set of aesthetic mappings created by [ggplot2::aes]. If
-specified and \code{inherit.aes = TRUE} (the default), is combined with the
-default mapping at the top level of the plot. You only need to supply
-\code{mapping} if there isn't a mapping defined for the plot.}
+\item{mapping}{Set of aesthetic mappings created by
+\code{\link[ggplot2]{aes}}. If specified and with \code{inherit.aes = TRUE}
+(the default), it is combined with the default mapping at the top level of
+the plot. You only need to supply \code{mapping} if there isn't a mapping
+defined for the plot.}
 
 \item{data}{A data frame. If specified, overrides the default data frame
 defined at the top level of the plot.}
@@ -80,6 +87,12 @@ starting position of each text label. The units for \code{nudge_x} and
 \item{add.segments}{logical Display connecting segments or arrows between
 original positions and displaced ones if both are available.}
 
+\item{box.padding, point.padding}{numeric By how much each end of the segments
+should shortened.}
+
+\item{min.segment.length}{numeric Segments shorter that the minimum length
+are not rendered. (implemented only for \code{geom_text_s()})}
+
 \item{arrow}{specification for arrow heads, as created by
 \code{\link[grid]{arrow}}}
 
@@ -87,13 +100,13 @@ original positions and displaced ones if both are available.}
 warning.  If \code{TRUE} silently removes missing values.}
 
 \item{show.legend}{logical. Should this layer be included in the legends?
-\code{NA}, the default, includes if any aesthetics are mapped. \code{FALSE}
-never includes, and \code{TRUE} always includes.}
+\code{NA}, the default, includes a legend if any aesthetics are mapped.
+\code{FALSE} never includes it, and \code{TRUE} always includes it.}
 
 \item{inherit.aes}{If \code{FALSE}, overrides the default aesthetics, rather
-than combining with them. This is most useful for helper functions that
+than combining them. This is most useful for helper functions that
 define both data and aesthetics and shouldn't inherit behaviour from the
-default plot specification, e.g. \code{\link[ggplot2]{borders}}.}
+default plot specification, e.g., \code{\link[ggplot2]{borders}}.}
 
 \item{check_overlap}{If \code{TRUE}, text that overlaps previous text in the
 same layer will not be plotted. \code{check_overlap} takes place at draw
@@ -105,127 +118,142 @@ A plot layer instance.
 }
 \description{
 Text geoms are most useful for labelling plots. `geom_text_s()`
-  adds text to the plot and for nudged positions links the original location
-  to the nudged text with a segment.
+  and `geom_label_s()` add text to the plot and for nudged positions link the
+  original location to the nudged text with a segment.
 }
 \details{
-Note that when you change the scale limits for x and/or y of a plot,
-  text labels stay the same size, as determined by the \code{size} aesthetic.
-  The actual size as seen in the plotted output is decided during the
-  rendering of the plot to a graphics device. Limits are expanded only to
+Geometries \code{geom_text_s()} and \code{geom_label_s()} have an interface
+  that follows closely that of \code{geom_text_repel()} and \code{geom_label_repel()}.
+  At the current stage of development even if formal parameters have the same
+  names, arguments with the same numeric value may have quantitatively
+  different effects on the resulting plot.
+
+  These geometries use by default \code{\link{position_nudge_keep}}
+  which is backwards compatible with \code{\link[ggplot2]{position_nudge}}.
+  In contrast to \code{\link[ggplot2]{position_nudge}},
+  \code{\link{position_nudge_keep}} and all other position functions defined
+  in packages 'ggpp' and 'ggrepel' keep the original coordinates, thus
+  allowing the plotting of connecting segments and arrows.
+
+  Note that when you change the scale limits for \emph{x} and/or \emph{y} of
+  a plot, text labels stay the same size, as determined by the \code{size}
+  aesthetic. The actual size as seen in the plotted output is decided during
+  the rendering of the plot to a graphics device. Limits are expanded only to
   include the anchor point of the labels because the "width" and "height" of
   a text element are 0 (as seen by ggplot2). For the same reason, stacking
   and dodging text will not work as they take place within 'ggplot2' before
   the rendered size of text is known. Text labels do have height and width,
   but in grid units, not data units.
-
-  By default this geom uses \code{\link{position_nudge_center}} which is
-  backwards compatible with \code{\link[ggplot2]{position_nudge}} but
-  provides additional control on the direction of the nudging. In contrast to
-  \code{\link[ggplot2]{position_nudge}}, \code{\link{position_nudge_center}}
-  and all other position functions defined in packages 'ggpp' and 'ggrepel'
-  keep the original coordinates thus allowing the plotting of connecting
-  segments and arrows.
-}
-\note{
-You can alternatively use \code{\link[ggrepel]{geom_label_repel}},
-  possibly setting `max.iter = 0` to disable repulsion when needed.
 }
 \section{Under development}{
- This is preliminary version of the geom. I plan
-  to add features like padding around text and points. I aim to make use of
-  the new features of 'grid' in R >= 4.1.0 to keep the implementation as fast
-  and simple as possible. Currently this geom does all drawing using at most
-  two vectorized calls to 'grid' functions. As a temporary replacement of
-  padding around text one can use 'slightly out-of-range' numeric values for
-  justification as shown in the examples. Aesthetics `segment.colour` and
-  `segment.alpha` are implemented, but `segment.linetype` not yet.
+ Aesthetic \code{segment.linetype} is not yet
+  implemented. The rendered plot may still slightly change slightly in
+  future versions. In particular justification based on the position
+  displacement needs some improvement.
 }
 
 \section{Alignment}{
- You can modify text alignment with the `vjust` and
-  `hjust` aesthetics. These can either be a number between 0 (right/bottom)
-  and 1 (top/left) or a character (`"left"`, `"middle"`, `"right"`,
-  `"bottom"`, `"center"`, `"top"`). There several two special alignments:
-  `"inward"` and `"outward"`. Inward always aligns text towards the center of
-  the plotting area, and outward aligns it away from the center of the
-  plotting area. It tagged with `_mean` or `_median` the mean or median of
-  the data in the panel along the corresponding axis is used as center.
+ You can modify text alignment with the \code{vjust} and
+  \code{hjust} aesthetics. These can either be a number between 0
+  (right/bottom) and 1 (top/left) or a character (\code{"left"},
+  \code{"middle"}, \code{"right"}, \code{"bottom"}, \code{"center"},
+  \code{"top"}). In addition, you can use special alignments for
+  justification including \code{"position"}, \code{"inward"} and
+  \code{"outward"}. Inward always aligns text towards the center of the
+  plotting area, and outward aligns it away from the center of the plotting
+  area. If tagged with \code{_mean} or \code{_median} (e.g.,
+  \code{"outward_mean"}) the mean or median of the data in the panel along
+  the corresponding axis is used as center. If the characters following the
+  underscore represent a number (e.g., \code{"outward_10.5"}) the reference
+  point will be this value in data units. Position justification is computed
+  based on the direction of the displacement of the position of the label so
+  that each individual text or label is justified outwards from its original
+  position. The default justification is \code{"position"}.
+
+  If nudging is at its default of zero, or a position function defined in
+  'ggplot2' is used, these geometries behave like the corresponding
+  ones from package 'ggplot2' with a default justification of \code{0.5} and
+  no segment drawn.
 }
 
 \examples{
 
 my.cars <- mtcars[c(TRUE, FALSE, FALSE, FALSE), ]
 my.cars$name <- rownames(my.cars)
-p <- ggplot(my.cars, aes(wt, mpg, label = name))
-
-# default behavior is as for geon_text()
-p + geom_text_s()
-# Avoid overlaps
-p + geom_text_s(check_overlap = TRUE)
-# Change size of the label
-p + geom_text_s(size = 2.5)
-
-# default behavior is as for geon_label()
-p + geom_label_s()
-# Change size of the label
-p + geom_label_s(size = 2.5)
+p <- ggplot(my.cars, aes(wt, mpg, label = name)) +
+       geom_point(color = "red")
 
 # Use nudging
 p +
-  geom_point() +
-  geom_text_s(hjust = -0.04, nudge_x = 0.12) +
+  geom_text_s(nudge_x = 0.12) +
   expand_limits(x = 6.2)
 p +
-  geom_point() +
-  geom_text_s(hjust = -0.04, nudge_x = 0.12,
-  arrow = arrow(length = grid::unit(1.5, "mm"))) +
+  geom_text_s(nudge_x = 0.12,
+              arrow = arrow(length = grid::unit(1.5, "mm"))) +
   expand_limits(x = 6.2)
 p +
-  geom_point() +
-  geom_text_s(vjust = -0.5, nudge_y = 0.5)
+  geom_text_s(hjust = "left", nudge_x = 0.12) +
+  expand_limits(x = 6.2)
 p +
-  geom_point() +
-  geom_text_s(angle = 90,
-              hjust = -0.04, nudge_y = 1,
+  geom_text_s(nudge_y = 0.1, nudge_x = 0.07) +
+  expand_limits(x = 6.2)
+p +
+  geom_text_s(nudge_y = 0.25, angle = 90) +
+  expand_limits(y = 30)
+p +
+  geom_text_s(nudge_y = 0.22) +
+  expand_limits(x = c(2, 6))
+p +
+  geom_text_s(angle = 90, nudge_y = 1,
               arrow = arrow(length = grid::unit(1.5, "mm")),
               segment.colour = "red") +
   expand_limits(y = 30)
 
 p +
-  geom_point() +
-  geom_label_s(hjust = 0, nudge_x = 0.12) +
+  geom_label_s(nudge_x = 0.12) +
   expand_limits(x = 6.2)
+
+p +
+  geom_label_s(hjust = "outward_1", nudge_x = 0.12) +
+  expand_limits(x = 6.2)
+
+p +
+  geom_label_s(hjust = "inward_3", nudge_y = 0.4)
+
+p +
+  geom_label_s(nudge_x = 0.1) +
+  expand_limits(x = 6.2)
+
+p +
+  geom_label_s(nudge_x = -0.1) +
+  expand_limits(x = 1.5)
 
 # Add aesthetic mappings and adjust arrows
 p +
-  geom_point() +
   geom_text_s(aes(colour = factor(cyl)),
               segment.colour = "black",
               angle = 90,
-              hjust = -0.04, nudge_y = 1,
+              nudge_y = 1,
               arrow = arrow(angle = 20,
                             length = grid::unit(1.5, "mm"),
                             ends = "first",
                             type = "closed"),
               show.legend = FALSE) +
   scale_colour_discrete(l = 40) + # luminance, make colours darker
-  expand_limits(y = 40)
+  expand_limits(y = 25)
 
 # Add aesthetic mappings and adjust arrows
 p +
-  geom_point() +
   geom_label_s(aes(colour = factor(cyl)),
-              hjust = 0, nudge_x = 0.3,
+              nudge_x = 0.3,
               arrow = arrow(angle = 20,
-                            length = grid::unit(2/3, "lines"))) +
+                            length = grid::unit(1/3, "lines"))) +
   scale_colour_discrete(l = 40) + # luminance, make colours darker
   expand_limits(x = 7)
 
 # Scale height of text, rather than sqrt(height)
 p +
-  geom_point() +
-  geom_text_s(aes(size = wt), nudge_x = -0.1, hjust = "right") +
+  geom_text_s(aes(size = wt), nudge_x = -0.1) +
   scale_radius(range = c(3,6)) + # override scale_area()
     expand_limits(x = c(1.8, 5.5))
 

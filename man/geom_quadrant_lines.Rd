@@ -45,8 +45,9 @@ the plot defaults.}
 \item{position}{The position adjustment to use for overlapping points on this
 layer}
 
-\item{pool.along}{character, one of "none", "x" or "y", indicating which
-quadrants to pool to calculate counts by pair of quadrants.}
+\item{pool.along}{character, one of \code{"none"}, \code{"x"} or \code{"y"},
+indicating which quadrants to pool to calculate counts by pair of
+quadrants.}
 
 \item{xintercept, yintercept}{numeric vectors the coordinates of the origin of the
 quadrants.}
@@ -106,16 +107,22 @@ ggplot(my.data, aes(x, y)) +
   geom_point()
 
 ggplot(my.data, aes(x, y)) +
-  geom_quadrant_lines(xintercept = 50, yintercept = 10, colour = "blue") +
+  geom_quadrant_lines(xintercept = 50,
+                      yintercept = 10,
+                      colour = "blue") +
   geom_point()
 
 ggplot(my.data, aes(x, y)) +
-  geom_quadrant_lines(xintercept = 50, pool.along = "y", colour = "blue") +
+  geom_quadrant_lines(xintercept = 50,
+                      pool.along = "y",
+                      colour = "blue") +
   geom_point()
 
 ggplot(my.data, aes(x, y)) +
-  geom_vhlines(xintercept = c(25, 50, 75), yintercept = 10 ,
-               linetype = "dotted", colour = "red") +
+  geom_vhlines(xintercept = c(25, 50, 75),
+               yintercept = 10 ,
+               linetype = "dotted",
+               colour = "red") +
   geom_point() +
   theme_bw()
 

@@ -1,18 +1,19 @@
 #' Combined positions stack and nudge
 #'
-#' `position_stacknudge()` is useful when labelling plots such as stacked
+#' \code{position_stacknudge()} is useful when labelling plots such as stacked
 #' bars, stacked columns, stacked lines, etc. In contrast to
-#' [ggplot2::position_nudge], `position_stacknudge()` returns in `data`
-#' both the original coordinates and the nudged coordinates.
+#' \code{\link[ggplot2]{position_nudge}}, \code{position_stacknudge()} returns
+#' in \code{data} both the original coordinates and the nudged coordinates.
 #'
-#' This position function is backwards compatible with [ggplot2::position_nudge]
-#' but extends it by adding support for stacking and for the repulsive geometries
-#' from package 'ggrepel'.
+#' This position function is backwards compatible with
+#' \code{\link[ggplot2]{position_nudge}} but extends it by adding support for
+#' stacking and for geometries that make use of the original position to draw
+#' connecting segments or arrows.
 #'
-#' The wrapper `position_nudge_keep()` with exactly the same signature and
-#' behaviour as [ggplot2::position_nudge] provides an easier to remember name
-#' when the desire is only to have access to both the original and nudged
-#' coordinates.
+#' The wrapper \code{position_nudge_keep()} with exactly the same signature and
+#' behaviour as \code{\link[ggplot2]{position_nudge}} provides an easier to
+#' remember name when the desire is only to have access to both the original and
+#' nudged coordinates.
 #'
 #' @family position adjustments
 #'
@@ -22,14 +23,18 @@
 #' @param reverse If TRUE, will reverse the default stacking order. This is
 #'   useful if you're rotating both the plot and legend.
 #' @param x,y Amount of vertical and horizontal distance to move. A numeric
-#'   vector of length 1, or of the same length as rows there are in `data`,
-#' @param direction One of "none", "split", "split.x" or "split.y". A value of
-#'   "none" replicates the behavior of [ggplot2::position_nudge]. At the moment
-#'   "split" changes the sign of the nudge at zero, which is suiatble for column
-#'   plots with negative slices.
-#' @param kept.origin One of "original", "stacked" or "none".
+#'   vector of length 1, or of the same length as rows there are in \code{data},
+#' @param direction One of \code{"none"}, \code{"split"}, \code{"split.x"} or
+#'   \code{"split.y"}. A value of \code{"none"} replicates the behavior of
+#'   \code{\link[ggplot2]{position_nudge}}. At the moment \code{"split"} changes
+#'   the sign of the nudge at zero, which is suitable for column plots with
+#'   negative slices.
+#' @param kept.origin One of \code{"original"}, \code{"stacked"} or
+#'   \code{"none"}.
 #'
-#' @seealso [ggplot2::position_nudge()], [ggrepel::position_nudge_repel()].
+#' @seealso \code{\link[ggplot2]{position_nudge}},
+#'   \code{\link[ggplot2]{position_stack}},
+#'   \code{\link[ggrepel]{position_nudge_repel}}.
 #'
 #' @return A \code{"Position"} object.
 #'
@@ -41,8 +46,8 @@
 #'
 #' @examples
 #'
-#' df <- data.frame(x1 = c(1, 2, 1, 3, -1),
-#'                  x2 = c("a", "a", "b", "b", "b"),
+#' df <- data.frame(x1 = c("a", "a", "b", "b", "b"),
+#'                  x2 = c(1, 2, 1, 3, -1),
 #'                  grp = c("some long name", "other name", "some name",
 #'                          "another name", "some long name"))
 #'
@@ -66,7 +71,7 @@
 #'   theme(legend.position = "none")
 #'
 #' # Add labels to a vertical column plot (stacked by default)
-#' ggplot(data = subset(df, x1 >= 0), aes(x2, x1, group = grp)) +
+#' ggplot(data = subset(df, x1 >= 0), aes(x1, x2, group = grp)) +
 #'   geom_col(aes(fill = grp), width=0.5, position = position_fill()) +
 #'   geom_vline(xintercept = 0) +
 #'   geom_text(
@@ -76,7 +81,7 @@
 #'   theme(legend.position = "none")
 #'
 #' # Add label at a fixed distance from the top of each column slice
-#' ggplot(data = df, aes(x2, x1, group = grp)) +
+#' ggplot(data = df, aes(x1, x2, group = grp)) +
 #'   geom_col(aes(fill = grp), width=0.5) +
 #'   geom_vline(xintercept = 0) +
 #'   geom_text(
@@ -86,12 +91,12 @@
 #'
 #' # Use geom_text_s(), geom_text_repel() or geom_label_repel() to link
 #' # label to labelled segment or object with an arrow
-#' ggplot(data = df, aes(x1, x2, group = grp)) +
+#' ggplot(data = df, aes(x2, x1, group = grp)) +
 #'   geom_col(aes(fill = grp), width=0.5) +
 #'   geom_vline(xintercept = 0) +
 #'   geom_text_s(
 #'     aes(label = grp),
-#'     position = position_stacknudge(vjust = 0.5, y = 0.4),
+#'     position = position_stacknudge(vjust = 0.5, y = 0.35),
 #'     vjust = "bottom") +
 #'   theme(legend.position = "none")
 #'

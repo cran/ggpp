@@ -1,65 +1,69 @@
 #' Nudge labels away from a central point
 #'
-#' `position_nudge_center()` is generally useful for adjusting the position of
+#' \code{position_nudge_center()} is generally useful for adjusting the position of
 #' labels or text, both on a discrete or continuous scale. In contrast to
-#' [ggplot2::position_nudge], `position_nudge_center()` returns in `data` both
+#' \code{\link[ggplot2]{position_nudge}}, \code{position_nudge_center()} returns in \code{data} both
 #' the original coordinates and the nudged coordinates.
 #'
-#' This position function is backwards compatible with [ggplot2::position_nudge]
+#' This position function is backwards compatible with \code{\link[ggplot2]{position_nudge}}
 #' but extends it by adding support for nudging that varies across the plotting
-#' region, either in opposite directions or radially from a virtual _center
-#' point_.
+#' region, either in opposite directions or radially from a virtual emph{center
+#' point}.
 #'
-#' The wrapper `position_nudge_keep()` with exactly the same signature and
-#' behaviour as [ggplot2::position_nudge] provides an easier to remember name
+#' The wrapper \code{position_nudge_keep()} with exactly the same signature and
+#' behaviour as \code{\link[ggplot2]{position_nudge}} provides an easier to remember name
 #' when the desire is only to have access to both the original and nudged
 #' coordinates.
 #'
 #' @family position adjustments
 #'
 #' @param x,y Amount of vertical and horizontal distance to move. A numeric
-#'   vector of length 1, or of the same length as rows there are in `data`,
+#'   vector of length 1, or of the same length as rows there are in \code{data},
 #' @param center_x,center_y The coordinates of the virtual origin out from which
 #'   nudging radiates or splits in opposite directions. A numeric vector of
-#'   length 1 or of the same length as rows there are in `data`, or a function
-#'   returning either of these vectors computed from the variables in data
-#'   mapped to `x` or `y`, respectively.
-#' @param direction One of "none", "radial", or "split". A value of "none"
-#'   replicates the behavior of [ggplot2::position_nudge]. Which of these three
-#'   values is the default depends on the values passed to the other parameters.
-#' @param obey_grouping A logical flag indicating whether to obey or not groupings
-#'   of the observations. By default, grouping is obeyed when both of the
-#'   variables mapped to _x_ and _y_ are continuous numeric and ignored
-#'   otherwise.
-#' @param kept.origin One of "original" or "none".
+#'   length 1 or of the same length as rows there are in \code{data}, or a
+#'   function returning either of these vectors computed from the variables in
+#'   data mapped to \code{x} or \code{y}, respectively.
+#' @param direction One of \code{"none"}, \code{"radial"}, or \code{"split"}. A
+#'   value of \code{"none"} replicates the behavior of
+#'   \code{\link[ggplot2]{position_nudge}}. Which of these three values is the
+#'   default depends on the values passed to the other parameters.
+#' @param obey_grouping A logical flag indicating whether to obey or not
+#'   groupings of the observations. By default, grouping is obeyed when both of
+#'   the variables mapped to \emph{x} and \emph{y} are continuous numeric and
+#'   ignored otherwise.
+#' @param kept.origin One of \code{"original"} or \code{"none"}.
 #'
-#' @details Positive values as arguments to `x` and `y` are added to the
-#'   original position along either axis. If no arguments are passed to
-#'   `center_x`, `center_y` or `direction`, the nudging is applied as is, as is
-#'   the case if `direction = "none"`. If non-`NULL` arguments are passed to
-#'   both `center_x` and `center_y`, `direction = "radial"` is assumed. In this
-#'   case, if `x` and/or `y` positive nudging is applied radially outwards from
+#' @details Positive values as arguments to \code{x} and \code{y} are added to
+#'   the original position along either axis. If no arguments are passed to
+#'   \code{center_x}, \code{center_y} or \code{direction}, the nudging is
+#'   applied as is, as is the case if \code{direction = "none"}. If
+#'   non-\code{NULL} arguments are passed to both \code{center_x} and
+#'   \code{center_y}, \code{direction = "radial"} is assumed. In this case, if
+#'   \code{x} and/or \code{y} positive nudging is applied radially outwards from
 #'   the center, while if negative, inwards towards the center. When a
-#'   non-`NULL` argument is passed only to one of `center_x` or `center_y`,
-#'   `direction = "split"` is assumed. In this case when the initial location of
-#'   the point is to the left of `center_x`, `-x` is used instead of `x` for
-#'   nudging, and when the initial location of the point is to the below of
-#'   `center_y`, `-y` is used instead of `y` for nudging. If non-`NULL` arguments
-#'   are passed to both `center_x` and `center_y`, and `direction` is passed
-#'   `"split"` as argument, then the split as described above is applied to
-#'   both _x_ and _y_ coordinates.
+#'   non-\code{NULL} argument is passed only to one of \code{center_x} or
+#'   \code{center_y}, \code{direction = "split"} is assumed. In this case when
+#'   the initial location of the point is to the left of \code{center_x},
+#'   \code{-x} is used instead of \code{x} for nudging, and when the initial
+#'   location of the point is to the below of \code{center_y}, \code{-y} is used
+#'   instead of \code{y} for nudging. If non-\code{NULL} arguments are passed to
+#'   both \code{center_x} and \code{center_y}, and \code{direction} is passed
+#'   \code{"split"} as argument, then the split as described above is applied to
+#'   both to \emph{x} and \emph{y} coordinates.
 #'
-#' @note Some situations are handled as special cases. When `direction =
-#'   "split"` or `direction = "radial"`, observations at exactly the _center_
-#'   are nudged using `x` and `y` unchanged. When `direction = "split"`, and
-#'   both `center_x` and `center_y` have been supplied, segments are drawn at
+#' @note Some situations are handled as special cases. When \code{direction =
+#'   "split"} or \code{direction = "radial"}, observations at exactly the _center_
+#'   are nudged using \code{x} and \code{y} unchanged. When\code{direction = "split"},
+#'   and
+#'   both \code{center_x} and \code{center_y} have been supplied, segments are drawn at
 #'   eight different possible angles. When segments are exactly horizontal or
 #'   vertical they would be shorter than when drawn at the other four angles, in
-#'   which case `x` or `y` are extended to ensure these segments are of the same
+#'   which case \code{x} or \code{y} are adjusted to ensure these segments are of the same
 #'   lengths as those at other angles.
 #'
 #'   This position is most useful when labeling points forming a cloud or
-#'   along vertical or horizontal lines or "divides".
+#'   grouped along vertical or horizontal lines or "divides".
 #'
 #' @seealso [ggplot2::position_nudge()], [ggrepel::position_nudge_repel()].
 #'
@@ -77,92 +81,83 @@
 #'
 #' ggplot(df, aes(x, y, label = y)) +
 #'   geom_point() +
-#'   geom_text(hjust = 0, vjust = 0,
-#'             position = position_nudge(x = 0.05, y = 0.07)
-#'   )
+#'   geom_text_s(hjust = "left", vjust = "bottom",
+#'               position = position_nudge(x = 0.2, y = 0.2))
 #'
 #' ggplot(df, aes(x, y, label = y)) +
 #'   geom_point() +
-#'   geom_text(hjust = 0, vjust = 0,
-#'             position = position_nudge_center(x = 0.05, y = 0.07)
+#'   geom_text_s(add.segments = FALSE,
+#'               position = position_nudge_center(x = 0.2, y = 0.2)
 #'   )
 #'
 #' # "split" nudging
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             hjust = "outward", vjust = "outward",
-#'             position = position_nudge_center(x = 0.05,
-#'                                              y = 0.07,
-#'                                              direction = "split"))
+#'   geom_text_s(aes(label = y),
+#'               add.segments = FALSE,
+#'               position = position_nudge_center(x = 0.2,
+#'                                                y = 0.2,
+#'                                                direction = "split"))
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             hjust = "outward",
-#'             position = position_nudge_center(x = 0.08,
-#'                                              direction = "split"))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = 0.4,
+#'                                                direction = "split"))
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             vjust = "outward",
-#'             position = position_nudge_center(y = 0.1,
-#'                                              direction = "split"))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(y = 0.2,
+#'                                                direction = "split"))
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             vjust = "outward", hjust = "outward",
-#'             position = position_nudge_center(x = 0.06,
-#'                                              y = 0.08,
-#'                                              center_y = 2,
-#'                                              center_x = 1.5,
-#'                                              direction = "split"))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = 0.2,
+#'                                                y = 0.3,
+#'                                                center_y = 2,
+#'                                                center_x = 1.5,
+#'                                                direction = "split"))
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             vjust = "outward", hjust = "outward",
-#'             position = position_nudge_center(x = 0.06,
-#'                                              y = 0.08,
-#'                                              center_y = 2))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = 0.06,
+#'                                                y = 0.08,
+#'                                                center_y = 2))
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             vjust = "outward", hjust = "outward",
-#'             position = position_nudge_center(x = 0.1,
-#'                                              center_x = 2.5))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = 0.1,
+#'                                                center_x = 2.51))
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             vjust = "outward", hjust = "outward",
-#'             position = position_nudge_center(x = 0.06,
-#'                                              y = 0.08,
-#'                                              center_x = median,
-#'                                              center_y = median,
-#'                                              direction = "split"))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = 0.06,
+#'                                                y = 0.08,
+#'                                                center_x = median,
+#'                                                center_y = median,
+#'                                                direction = "split"))
 #'
 #' # "Radial" nudging
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             vjust = "outward", hjust = "outward",
-#'             position = position_nudge_center(x = 0.1,
-#'                                              y = 0.2,
-#'                                              direction = "radial"))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = 0.1,
+#'                                                y = 0.2,
+#'                                                direction = "radial"))
 #'
 #' ggplot(df, aes(x, y)) +
 #'   geom_point() +
-#'   geom_text(aes(label = y),
-#'             vjust = "inward", hjust = "inward",
-#'             position = position_nudge_center(x = -0.1,
-#'                                              y = -0.1,
-#'                                              direction = "radial"))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = -0.1,
+#'                                                y = -0.1,
+#'                                                direction = "radial"))
 #'
 #' df <- data.frame(
 #'   x = -10:10,
@@ -174,43 +169,39 @@
 #' ggplot(df, aes(x, z)) +
 #'   geom_point() +
 #'   geom_line() +
-#'   geom_text(aes(label = y),
-#'             vjust = "inward", hjust = "inward",
-#'             position = position_nudge_center(x = -0.9,
-#'                                              y = -2.7,
-#'                                              center_x = mean,
-#'                                              center_y = max))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = -0.9,
+#'                                                y = -2.7,
+#'                                                center_x = mean,
+#'                                                center_y = max))
 #'
 #' ggplot(df, aes(x, z)) +
 #'   geom_point() +
 #'   geom_line() +
-#'   geom_text(aes(label = y),
-#'             vjust = "outward", hjust = "outward",
-#'             position = position_nudge_center(x = 0.9,
-#'                                              y = 2.7,
-#'                                              center_x = mean,
-#'                                              center_y = max))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = 0.9,
+#'                                                y = 2.7,
+#'                                                center_x = mean,
+#'                                                center_y = max))
 #'
 #' above_max <- function(x) {1.2 * max(x)}
 #' ggplot(df, aes(x, z)) +
 #'   geom_point() +
 #'   geom_line() +
-#'   geom_text(aes(label = y),
-#'             vjust = "inward", hjust = "inward",
-#'             position = position_nudge_center(x = -1.2,
-#'                                              y = -3,
-#'                                              center_x = mean,
-#'                                              center_y = above_max))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = -1.2,
+#'                                                y = -3,
+#'                                                center_x = mean,
+#'                                                center_y = above_max))
 #'
 #' ggplot(df, aes(x, z, color = group)) +
 #'   geom_point() +
 #'   geom_line(color = "black", linetype = "dotted") +
-#'   geom_text(aes(label = y),
-#'             vjust = "inward", hjust = "inward",
-#'             position = position_nudge_center(x = -0.9,
-#'                                              y = -2.7,
-#'                                              center_x = mean,
-#'                                              center_y = max))
+#'   geom_text_s(aes(label = y),
+#'               position = position_nudge_center(x = -1.2,
+#'                                                y = -3,
+#'                                                center_x = 0,
+#'                                                center_y = above_max))
 #'
 #' ggplot(df, aes(x, z, color = group)) +
 #'   geom_point() +
@@ -260,7 +251,7 @@ position_nudge_center <-
     }
 
     if (is.null(obey_grouping)) {
-      # default needs to be set in panel_fucntion when we have access to data
+      # default needs to be set in panel_function when we have access to data
       obey_grouping <- NA
     }
 
@@ -307,7 +298,9 @@ PositionNudgeCenter <-
       y_orig <- data$y
       # we handle grouping by ourselves
       if (is.na(params$obey_grouping)) {
-        if (inherits(data$x, "mapped_discrete") ||
+        if (inherits(data$x, "ggplot2_mapped_discrete") ||
+            inherits(data$y, "ggplot2_mapped_discrete") ||
+            inherits(data$x, "mapped_discrete") ||
             inherits(data$y, "mapped_discrete") ||
             params$direction == "none") {
           # we ignore grouping as position_nudge() does
@@ -333,7 +326,7 @@ PositionNudgeCenter <-
           in.grp <- data$group == group
         } else {
           # selector for all rows
-          in.grp <- TRUE
+          in.grp <- rep(TRUE, nrow(data))
         }
         # compute focal center by group
         if (is.function(params$center_x)) {
@@ -355,6 +348,10 @@ PositionNudgeCenter <-
           # compute x and y nudge for each point
           x_dist <- as.numeric(data[in.grp, "x"]) - x_ctr
           y_dist <- as.numeric(data[in.grp, "y"]) - y_ctr
+          # if both x and y position displacements are 0, we force a shift
+          overlapping <- (abs(x_dist) < 1e-5) & (abs(y_dist) < 1e-5)
+          x_dist <- ifelse(overlapping, 1e-5, x_dist)
+          y_dist <- ifelse(overlapping, 1e-5, y_dist)
           angle <- atan2(y_dist, x_dist) + pi / 2
           if (params$x == 0) {
             angle <- ifelse(cos(angle) == 0, 0, angle)
@@ -362,6 +359,7 @@ PositionNudgeCenter <-
           if (params$y == 0) {
             angle <- ifelse(sin(angle) == 0, pi / 2, angle)
           }
+
           x_nudge[in.grp] <- params$x * sin(angle)
           y_nudge[in.grp] <- -params$y * cos(angle)
         } else if (params$direction == "split") {
@@ -379,6 +377,10 @@ PositionNudgeCenter <-
           }
           x_nudge[in.grp] <- xx * sign(as.numeric(data[in.grp, "x"]) - x_ctr)
           y_nudge[in.grp] <- yy * sign(as.numeric(data[in.grp, "y"]) - y_ctr)
+          # if both x and y position displacements are 0, we force a shift
+          overlapping <- (x_nudge[in.grp] == 0) & (y_nudge[in.grp] == 0)
+          x_nudge[in.grp] <- ifelse(overlapping, xx, x_nudge[in.grp])
+          y_nudge[in.grp] <- ifelse(overlapping, yy, y_nudge[in.grp])
         } else {
           if (params$direction != "none") {
             warning("Ignoring unrecognized direction \"",

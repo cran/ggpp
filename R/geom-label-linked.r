@@ -1,8 +1,9 @@
-#' @export
 #' @rdname geom_text_s
 #' @param label.padding Amount of padding around label. Defaults to 0.25 lines.
 #' @param label.r Radius of rounded corners. Defaults to 0.15 lines.
 #' @param label.size Size of label border, in mm.
+#'
+#' @export
 #'
 geom_label_s <- function(mapping = NULL,
                          data = NULL,
@@ -16,6 +17,9 @@ geom_label_s <- function(mapping = NULL,
                          label.r = grid::unit(0.15, "lines"),
                          label.size = 0.25,
                          add.segments = TRUE,
+                         box.padding = 0.25,
+                         point.padding = 1e-06,
+                         min.segment.length = 0,
                          arrow = NULL,
                          na.rm = FALSE,
                          show.legend = NA,
@@ -25,11 +29,8 @@ geom_label_s <- function(mapping = NULL,
     if (!missing(position) && position != "identity") {
       rlang::abort("You must specify either `position` or `nudge_x`/`nudge_y`.")
     }
-    # We do not keep the original positions if they will not be used
-    position <-
-      position_nudge_center(nudge_x, nudge_y,
-                            kept.origin = ifelse(add.segments,
-                                                 "original", "none"))
+    # by default we keep the original positions
+    position <- position_nudge_keep(nudge_x, nudge_y)
   }
 
   ggplot2::layer(
@@ -46,6 +47,9 @@ geom_label_s <- function(mapping = NULL,
       label.r = label.r,
       label.size = label.size,
       add.segments = add.segments,
+      box.padding = box.padding,
+      point.padding = point.padding,
+      min.segment.length = min.segment.length,
       arrow = arrow,
       na.rm = na.rm,
       ...
@@ -66,15 +70,15 @@ GeomLabelS <-
                      fill = "white",
                      size = 3.88,
                      angle = 0,
-                     hjust = 0.5,
-                     vjust = 0.5,
+                     hjust = "position",
+                     vjust = "position",
                      alpha = NA,
                      family = "",
                      fontface = 1,
                      lineheight = 1.2,
                      segment.linetype = 1,
                      segment.colour = "grey33",
-                     segment.size = 0.5,
+                     segment.size = 1.5,
                      segment.alpha = 1
                    ),
 
@@ -82,6 +86,9 @@ GeomLabelS <-
                                          parse = FALSE,
                                          na.rm = FALSE,
                                          add.segments = TRUE,
+                                         box.padding = 0.25,
+                                         point.padding = 1e-06,
+                                         min.segment.length = 0,
                                          arrow = NULL,
                                          label.padding = unit(0.25, "lines"),
                                          label.r = unit(0.15, "lines"),
@@ -101,9 +108,11 @@ GeomLabelS <-
                      }
 
                      data <- coord$transform(data, panel_params)
-                     if (add.segments) {
+                     if (all(c("x_orig", "y_orig") %in% colnames(data))) {
                        data_orig <- data.frame(x = data$x_orig, y = data$y_orig)
                        data_orig <- coord$transform(data_orig, panel_params)
+                       data$x_orig <- data_orig$x
+                       data$y_orig <- data_orig$y
                      }
 
                      if (is.character(data$vjust)) {
@@ -148,16 +157,22 @@ GeomLabelS <-
                      class(label.grobs) <- "gList"
 
                      if(add.segments) {
+                       segments.data <-
+                         shrink_segments(data,
+                                         point.padding = point.padding,
+                                         box.padding = box.padding,
+                                         min.segment.length = min.segment.length)
                        # create the grobs
                        segment.grobs <-
                          grid::segmentsGrob(
-                           x1 = data$x,
-                           y1 = data$y,
-                           x0 = data_orig$x,
-                           y0 = data_orig$y,
+                           x1 = segments.data$x,
+                           y1 = segments.data$y,
+                           x0 = segments.data$x_orig,
+                           y0 = segments.data$y_orig,
                            arrow = arrow,
                            gp = grid::gpar(col = alpha(data$segment.colour,
-                                                       data$segment.alpha)))
+                                                       data$segment.alpha),
+                                           lwd = data$segment.size))
                        all.grobs <- gList(segment.grobs, label.grobs)
                      } else {
                        all.grobs <- label.grobs
@@ -170,20 +185,21 @@ GeomLabelS <-
                    draw_key = draw_key_text
   )
 
-labelGrob <- function(label, x = grid::unit(0.5, "npc"), y = grid::unit(0.5, "npc"),
-                      just = "center", padding = grid::unit(0.25, "lines"), r = grid::unit(0.1, "snpc"),
-                      default.units = "npc", name = NULL,
-                      text.gp = grid::gpar(), rect.gp = grid::gpar(fill = "white"), vp = NULL) {
+labelGrob <-
+  function(label, x = grid::unit(0.5, "npc"), y = grid::unit(0.5, "npc"),
+           just = "center", padding = grid::unit(0.25, "lines"), r = grid::unit(0.1, "snpc"),
+           default.units = "npc", name = NULL,
+           text.gp = grid::gpar(), rect.gp = grid::gpar(fill = "white"), vp = NULL) {
 
-  if (length(label) != 1) {
-    rlang::abort("label must be of length 1")
+    if (length(label) != 1) {
+      rlang::abort("label must be of length 1")
+    }
+
+    if (!grid::is.unit(x))
+      x <- grid::unit(x, default.units)
+    if (!grid::is.unit(y))
+      y <- grid::unit(y, default.units)
+
+    grid::gTree(label = label, x = x, y = y, just = just, padding = padding, r = r,
+                name = name, text.gp = text.gp, rect.gp = rect.gp, vp = vp, cl = "labelgrob")
   }
-
-  if (!grid::is.unit(x))
-    x <- grid::unit(x, default.units)
-  if (!grid::is.unit(y))
-    y <- grid::unit(y, default.units)
-
-  grid::gTree(label = label, x = x, y = y, just = just, padding = padding, r = r,
-        name = name, text.gp = text.gp, rect.gp = rect.gp, vp = vp, cl = "labelgrob")
-}
