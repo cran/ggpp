@@ -6,6 +6,21 @@ editor_options:
     wrap: 72
 ---
 
+# ggpp 0.5.0
+
+-   Add `stat_panel_counts()` and `stat_group_counts()`.
+-   Add parameters `default.colour` and `colour.target` to `geom_label_s()`,
+    `geom_text_s()`, `geom_point_s()`, `geom_plot()`, `geom_table()` and `geom_grob()`.
+-   Add parameters `default.alpha` and `alpha.target` to `geom_label_s()`,
+    `geom_text_s()`, `geom_point_s()`, `geom_plot()`, `geom_table()` and `geom_grob()`.
+-   **Code breaking.** Remove support for aesthetics `segment.colour`,
+    `segment.alpha`, and `segment.size` in `geom_label_s()`,
+    `geom_text_s()`, `geom_point_s()`, `geom_plot()`, `geom_table()` and `geom_grob()`. (Segments 
+    are links, and not meant to inform about data values on their own.)
+-   Add vignette "Combining repulsion and nudging" describing the plot features
+    made possible by packages 'ggpp' (>= 0.5.0) and 'ggrepel' 
+    (>= 0.9.2) when used together.
+
 # ggpp 0.4.5
 
 -   Add function `dark_or_light()`.

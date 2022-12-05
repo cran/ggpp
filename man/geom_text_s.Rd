@@ -14,11 +14,15 @@ geom_label_s(
   parse = FALSE,
   nudge_x = 0,
   nudge_y = 0,
+  default.colour = "black",
+  colour.target = "all",
+  default.alpha = 1,
+  alpha.target = "box.fill",
   label.padding = grid::unit(0.25, "lines"),
   label.r = grid::unit(0.15, "lines"),
-  label.size = 0.25,
+  segment.linewidth = 0.5,
   add.segments = TRUE,
-  box.padding = 0.25,
+  box.padding = 1e-06,
   point.padding = 1e-06,
   min.segment.length = 0,
   arrow = NULL,
@@ -36,9 +40,14 @@ geom_text_s(
   parse = FALSE,
   nudge_x = 0,
   nudge_y = 0,
+  default.colour = "black",
+  colour.target = "all",
+  default.alpha = 1,
+  alpha.target = "all",
   add.segments = TRUE,
   box.padding = 0.25,
   point.padding = 1e-06,
+  segment.linewidth = 0.5,
   min.segment.length = 0,
   arrow = NULL,
   check_overlap = FALSE,
@@ -78,20 +87,33 @@ displayed as described in \code{?plotmath}.}
 starting position of each text label. The units for \code{nudge_x} and
 \code{nudge_y} are the same as for the data units on the x-axis and y-axis.}
 
+\item{default.colour}{A colour definition to use for elements not targeted by
+the colour aesthetic.}
+
+\item{colour.target}{A vector of character strings; \code{"all"},
+\code{"text"}, \code{"box"} and \code{"segment"}.}
+
+\item{default.alpha}{numeric in [0..1] A transparency value to use for
+elements not targeted by the alpha aesthetic.}
+
+\item{alpha.target}{A vector of character strings; \code{"all"},
+\code{"text"}, \code{"segment"}, \code{"box"}, \code{"box.line"}, and
+\code{"box.fill"}.}
+
 \item{label.padding}{Amount of padding around label. Defaults to 0.25 lines.}
 
 \item{label.r}{Radius of rounded corners. Defaults to 0.15 lines.}
 
-\item{label.size}{Size of label border, in mm.}
+\item{segment.linewidth}{numeric Width of the segments or arrows in mm.}
 
 \item{add.segments}{logical Display connecting segments or arrows between
 original positions and displaced ones if both are available.}
 
 \item{box.padding, point.padding}{numeric By how much each end of the segments
-should shortened.}
+should shortened in mm.}
 
 \item{min.segment.length}{numeric Segments shorter that the minimum length
-are not rendered. (implemented only for \code{geom_text_s()})}
+are not rendered, in mm.}
 
 \item{arrow}{specification for arrow heads, as created by
 \code{\link[grid]{arrow}}}
@@ -104,9 +126,9 @@ warning.  If \code{TRUE} silently removes missing values.}
 \code{FALSE} never includes it, and \code{TRUE} always includes it.}
 
 \item{inherit.aes}{If \code{FALSE}, overrides the default aesthetics, rather
-than combining them. This is most useful for helper functions that
-define both data and aesthetics and shouldn't inherit behaviour from the
-default plot specification, e.g., \code{\link[ggplot2]{borders}}.}
+than combining them. This is most useful for helper functions that define
+both data and aesthetics and shouldn't inherit behaviour from the default
+plot specification, e.g., \code{\link[ggplot2]{borders}}.}
 
 \item{check_overlap}{If \code{TRUE}, text that overlaps previous text in the
 same layer will not be plotted. \code{check_overlap} takes place at draw
@@ -117,39 +139,58 @@ which the plot is drawn.}
 A plot layer instance.
 }
 \description{
-Text geoms are most useful for labelling plots. `geom_text_s()`
-  and `geom_label_s()` add text to the plot and for nudged positions link the
-  original location to the nudged text with a segment.
+Linked text geometries are most useful for adding data labels to
+  plots. `geom_text_s()` and `geom_label_s()` add text to the plot and for
+  nudged positions link the original location to the nudged text with a
+  segment or arrow.
 }
 \details{
-Geometries \code{geom_text_s()} and \code{geom_label_s()} have an interface
-  that follows closely that of \code{geom_text_repel()} and \code{geom_label_repel()}.
-  At the current stage of development even if formal parameters have the same
-  names, arguments with the same numeric value may have quantitatively
-  different effects on the resulting plot.
+Geometries \code{geom_text_s()} and \code{geom_label_s()} have an
+  interface similar to that of \code{\link[ggplot2]{geom_text}} and
+  \code{\link[ggplot2]{geom_label}}, but support additional features.
+  Similarly to \code{geom_text_repel()} and \code{geom_label_repel()} when
+  used together with position functions defined in package 'ggpp' they draw a
+  segment linking the label at a displaced position to the original position,
+  usually a point corresponding to an observation to which the label refers.
+  Another difference is that they allow control of to which graphical
+  elements the mappings to colour and alpha aesthetics are applied.
+  Differently to \code{geom_label()}, \code{geom_label_s()} obeys aesthetic
+  mappings to \code{linewidth} and \code{linetype} applied to the line at the
+  edge of the label box.
 
-  These geometries use by default \code{\link{position_nudge_keep}}
-  which is backwards compatible with \code{\link[ggplot2]{position_nudge}}.
-  In contrast to \code{\link[ggplot2]{position_nudge}},
-  \code{\link{position_nudge_keep}} and all other position functions defined
-  in packages 'ggpp' and 'ggrepel' keep the original coordinates, thus
-  allowing the plotting of connecting segments and arrows.
+  Layer functions \code{geom_text_s()} and \code{geom_label_s()} use by
+  default \code{\link{position_nudge_keep}} which is backwards compatible
+  with \code{\link[ggplot2]{position_nudge}}. In contrast to
+  \code{\link[ggplot2]{position_nudge}}, \code{\link{position_nudge_keep}}
+  and all other position functions defined in packages 'ggpp' and 'ggrepel'
+  keep the original coordinates, thus allowing the plotting of connecting
+  segments and arrows.
 
-  Note that when you change the scale limits for \emph{x} and/or \emph{y} of
-  a plot, text labels stay the same size, as determined by the \code{size}
-  aesthetic. The actual size as seen in the plotted output is decided during
-  the rendering of the plot to a graphics device. Limits are expanded only to
-  include the anchor point of the labels because the "width" and "height" of
-  a text element are 0 (as seen by ggplot2). For the same reason, stacking
-  and dodging text will not work as they take place within 'ggplot2' before
-  the rendered size of text is known. Text labels do have height and width,
-  but in grid units, not data units.
+  Differently to \code{geom_text_repel()} and \code{geom_label_repel()},
+  \code{geom_text_s()} and \code{geom_label_s()} do not make use of
+  additional aesthetics for the segments or boxes, but instead allow the
+  choice of which elements are targeted by the aesthetics and which are
+  rendered in a default colour. In the grammar of graphics using the same
+  aesthetic with multiple meanings is not allowed, thus, the approach used in
+  our geoms attempts to enforce this.
 }
-\section{Under development}{
- Aesthetic \code{segment.linetype} is not yet
-  implemented. The rendered plot may still slightly change slightly in
-  future versions. In particular justification based on the position
-  displacement needs some improvement.
+\section{Under development!}{
+ These two geometries are still under development
+  and their user interface subject to change. In 'ggpp' (== 0.5.0) support
+  for aesthetics related to segments was removed, and replaced with
+  parameters and a new mechanism for targeting a the usual aesthetics to
+  text, border, and segment was added.
+}
+
+\section{Plot boundaries and clipping}{
+ Note that when you change the scale
+  limits for \emph{x} and/or \emph{y} of a plot, text labels stay the same
+  size, as determined by the \code{size} aesthetic, given in millimetres. The
+  actual size as seen in the plotted output is decided during the rendering
+  of the plot to a graphics device. Limits are expanded only to include the
+  anchor point of the labels because the "width" and "height" of a text
+  element are 0 (as seen by ggplot2). Text labels do have height and width,
+  but in grid units, not data units.
 }
 
 \section{Alignment}{
@@ -170,10 +211,36 @@ Geometries \code{geom_text_s()} and \code{geom_label_s()} have an interface
   that each individual text or label is justified outwards from its original
   position. The default justification is \code{"position"}.
 
-  If nudging is at its default of zero, or a position function defined in
-  'ggplot2' is used, these geometries behave like the corresponding
+  If no position displacement is applied, or a position function defined in
+  'ggplot2' is used, these geometries behave similarly to the corresponding
   ones from package 'ggplot2' with a default justification of \code{0.5} and
   no segment drawn.
+}
+
+\section{Aesthetics}{
+ Layer functions \code{geom_text_s()} and
+  \code{geom_label_s()} require aesthetics \code{x}, \code{y} and
+  \code{label} and support aesthetics: \code{alpha}, \code{colour},
+  \code{group}, \code{size} (of text), \code{family}, \code{fontface},
+  \code{lineheight}, \code{hjust} and \code{vjust}. In addition,
+  \code{geom_text_s} supports \code{angle} and \code{geom_label_s} supports
+  \code{fill}, \code{linewidth} and \code{linetype}. See
+  \code{\link[ggplot2]{aes_colour_fill_alpha}},
+  \code{\link[ggplot2]{aes_linetype_size_shape}},
+  \code{\link[ggplot2]{aes_position}}, and
+  \code{\link[ggplot2]{aes_group_order}}.
+}
+
+\section{Position functions}{
+ Many layer functions from package 'ggpp' are
+  designed to work seamlessly with position functions that keep, rather than
+  discard, the original \code{x} and \code{y} positions in \code{data} when
+  computing a new displaced position. See \code{\link{position_nudge_keep}},
+  \code{\link{position_dodge_keep}}, \code{\link{position_jitter_keep}},
+  \code{\link{position_nudge_center}}, \code{\link{position_nudge_line}},
+  \code{\link{position_nudge_to}}, \code{\link{position_dodgenudge}},
+  \code{\link{position_jitternudge}}, and \code{\link{position_stacknudge}}
+  for examples and details of their use.
 }
 
 \examples{
@@ -188,8 +255,16 @@ p +
   geom_text_s(nudge_x = 0.12) +
   expand_limits(x = 6.2)
 p +
+  geom_text_s(nudge_x = -0.12) +
+  expand_limits(x = 1.5)
+p +
   geom_text_s(nudge_x = 0.12,
               arrow = arrow(length = grid::unit(1.5, "mm"))) +
+  expand_limits(x = 6.2)
+p +
+  geom_text_s(nudge_x = 0.12,
+              arrow = arrow(length = grid::unit(1.5, "mm")),
+              point.padding = 0.4) +
   expand_limits(x = 6.2)
 p +
   geom_text_s(hjust = "left", nudge_x = 0.12) +
@@ -198,40 +273,42 @@ p +
   geom_text_s(nudge_y = 0.1, nudge_x = 0.07) +
   expand_limits(x = 6.2)
 p +
-  geom_text_s(nudge_y = 0.25, angle = 90) +
+  geom_text_s(nudge_y = 1, angle = 90) +
   expand_limits(y = 30)
-p +
-  geom_text_s(nudge_y = 0.22) +
-  expand_limits(x = c(2, 6))
 p +
   geom_text_s(angle = 90, nudge_y = 1,
               arrow = arrow(length = grid::unit(1.5, "mm")),
-              segment.colour = "red") +
+              colour.target = "segment", colour = "red") +
+  expand_limits(y = 30)
+p +
+  geom_text_s(angle = 90, nudge_y = 1,
+              arrow = arrow(length = grid::unit(1.5, "mm")),
+              alpha.target = "segment", alpha = 0.3) +
   expand_limits(y = 30)
 
 p +
   geom_label_s(nudge_x = 0.12) +
   expand_limits(x = 6.2)
+p +
+  geom_label_s(nudge_x = 0.12, linetype = "dotted", linewidth = 0.4) +
+  expand_limits(x = 6.2)
+p +
+  geom_label_s(nudge_x = 0.12, linewidth = 0.5, label.r = unit(0, "lines")) +
+  expand_limits(x = 6.2)
+p +
+  geom_label_s(nudge_x = 0.12, linewidth = 0) +
+  expand_limits(x = 6.2)
 
+# Nudging away from arbitrary point
 p +
   geom_label_s(hjust = "outward_1", nudge_x = 0.12) +
   expand_limits(x = 6.2)
-
 p +
   geom_label_s(hjust = "inward_3", nudge_y = 0.4)
-
-p +
-  geom_label_s(nudge_x = 0.1) +
-  expand_limits(x = 6.2)
-
-p +
-  geom_label_s(nudge_x = -0.1) +
-  expand_limits(x = 1.5)
 
 # Add aesthetic mappings and adjust arrows
 p +
   geom_text_s(aes(colour = factor(cyl)),
-              segment.colour = "black",
               angle = 90,
               nudge_y = 1,
               arrow = arrow(angle = 20,
@@ -240,9 +317,21 @@ p +
                             type = "closed"),
               show.legend = FALSE) +
   scale_colour_discrete(l = 40) + # luminance, make colours darker
-  expand_limits(y = 25)
+  expand_limits(y = 27)
 
-# Add aesthetic mappings and adjust arrows
+p +
+  geom_text_s(aes(colour = factor(cyl)),
+              colour.target = "text",
+              angle = 90,
+              nudge_y = 1,
+              arrow = arrow(angle = 20,
+                            length = grid::unit(1.5, "mm"),
+                            ends = "first",
+                            type = "closed"),
+              show.legend = FALSE) +
+  scale_colour_discrete(l = 40) + # luminance, make colours darker
+  expand_limits(y = 27)
+
 p +
   geom_label_s(aes(colour = factor(cyl)),
               nudge_x = 0.3,
@@ -251,10 +340,43 @@ p +
   scale_colour_discrete(l = 40) + # luminance, make colours darker
   expand_limits(x = 7)
 
-# Scale height of text, rather than sqrt(height)
+p +
+  geom_label_s(aes(colour = factor(cyl)),
+              nudge_x = 0.3,
+              colour.target = "text",
+              arrow = arrow(angle = 20,
+                            length = grid::unit(1/3, "lines"))) +
+  scale_colour_discrete(l = 40) + # luminance, make colours darker
+  expand_limits(x = 7)
+
+p +
+  geom_label_s(aes(colour = factor(cyl)),
+              nudge_x = 0.3,
+              colour.target = c("box", "segment"),
+              linewidth = 0.6,
+              arrow = arrow(angle = 20,
+                            length = grid::unit(1/3, "lines"))) +
+  scale_colour_discrete(l = 40) + # luminance, make colours darker
+  expand_limits(x = 7)
+
+p +
+  geom_label_s(aes(colour = factor(cyl), fill = factor(cyl)),
+              nudge_x = 0.3,
+              alpha.target = "box",
+              alpha = 0.1,
+              linewidth = 0.5,
+              arrow = arrow(angle = 20,
+                            length = grid::unit(1/3, "lines"))) +
+  scale_colour_discrete(l = 40) + # luminance, make colours darker
+  expand_limits(x = 7)#' # Scale height of text, rather than sqrt(height)
+
 p +
   geom_text_s(aes(size = wt), nudge_x = -0.1) +
   scale_radius(range = c(3,6)) + # override scale_area()
     expand_limits(x = c(1.8, 5.5))
 
+}
+\seealso{
+\code{\link[ggplot2]{geom_text}}, \code{\link[ggplot2]{geom_label}}
+  and other documentation of package 'ggplot2'.
 }

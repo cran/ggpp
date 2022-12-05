@@ -12,8 +12,16 @@ geom_point_s(
   ...,
   nudge_x = 0,
   nudge_y = 0,
-  arrow = NULL,
+  arrow = grid::arrow(length = unit(1/3, "lines")),
+  default.colour = "black",
+  colour.target = "point",
+  default.alpha = 1,
+  alpha.target = "all",
   add.segments = TRUE,
+  box.padding = 0.25,
+  point.padding = 1e-06,
+  segment.linewidth = 0.5,
+  min.segment.length = 0,
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
@@ -50,8 +58,29 @@ starting position of each text label. The units for \code{nudge_x} and
 \item{arrow}{specification for arrow heads, as created by
 \code{\link[grid]{arrow}}}
 
+\item{default.colour}{A colour definition to use for elements not targeted by
+the colour aesthetic.}
+
+\item{colour.target}{A vector of character strings; \code{"all"},
+\code{"text"}, \code{"box"} and \code{"segment"}.}
+
+\item{default.alpha}{numeric in [0..1] A transparency value to use for
+elements not targeted by the alpha aesthetic.}
+
+\item{alpha.target}{A vector of character strings; \code{"all"},
+\code{"text"}, \code{"segment"}, \code{"box"}, \code{"box.line"}, and
+\code{"box.fill"}.}
+
 \item{add.segments}{logical Display connecting segments or arrows between
 original positions and displaced ones if both are available.}
+
+\item{box.padding, point.padding}{numeric By how much each end of the segments
+should shortened in mm.}
+
+\item{segment.linewidth}{numeric Width of the segments or arrows in mm.}
+
+\item{min.segment.length}{numeric Segments shorter that the minimum length
+are not rendered, in mm.}
 
 \item{na.rm}{If \code{FALSE} (the default), removes missing values with a
 warning.  If \code{TRUE} silently removes missing values.}
@@ -69,25 +98,46 @@ default plot specification, e.g. \code{\link[ggplot2]{borders}}.}
 A plot layer instance.
 }
 \description{
-The \code{"point_s"} geom provides a superset of the capabilities of geom
-\code{"point"} from package 'ggplot2' by allowing plotting of segments
-joining the original position of displaced observations to their current
-potition rendered as points or graphic symbols. Displacements by position
-functions from packages 'ggpp' and 'ggrepel' are supported.
+The geometry \code{"geom_point_s"} provides a super set of the capabilities of
+geom \code{\link[ggplot2]{geom_point}} from package 'ggplot2' by allowing
+plotting of arrows or segments joining the original position of displaced observations
+to their current position rendered as points or graphic symbols. The most
+common use is to demonstrate the action of different position functions. It
+can be also used to highlight observations.
 }
 \details{
-The plotting of segments is similar in idea at that available in
+The plotting of segments is similar in idea to that implemented in
   \code{\link[ggrepel]{geom_text_repel}} and relies on position functions
-  that rename instead of removing the original original \code{x} and \code{y}
+  that rename instead of only replacing the original \code{x} and \code{y}
   coordinates from the \code{data} object.
 
   By default this geom uses \code{\link{position_nudge_center}} which is backwards
   compatible with \code{\link[ggplot2]{position_nudge}} but provides additional control
-  on the direction of the nudging. In contrast to \code{\link[ggplot2]{position_nudge}},
-  \code{\link{position_nudge_center}} and all other position functions defined in
-  packaged 'ggpp' and 'ggrepel' keep the original coordinates thus allowing
-  the plotting of connecting segments and arrows.
+  on the direction of the nudging.
 }
+\note{
+The insets are stored nested within the main ggplot object and
+  contain their own copy of the data, and are rendered as grid grobs as normal
+  ggplots at the time the main ggplot is rendered. They can have different
+  themes.
+
+  Use \code{\link{annotate}} as redefined in 'ggpp' when adding insets
+  as annotations (automatically available unless 'ggpp' is not attached).
+  \code{\link[ggplot2]{annotate}} cannot be used with the \code{npcx} and
+  \code{npcy} pseudo-aesthetics.
+}
+\section{Position functions}{
+ Many layer functions from package 'ggpp' are
+  designed to work seamlessly with position functions that keep, rather than
+  discard, the original \code{x} and \code{y} positions in \code{data} when
+  computing a new displaced position. See \code{\link{position_nudge_keep}},
+  \code{\link{position_dodge_keep}}, \code{\link{position_jitter_keep}},
+  \code{\link{position_nudge_center}}, \code{\link{position_nudge_line}},
+  \code{\link{position_nudge_to}}, \code{\link{position_dodgenudge}},
+  \code{\link{position_jitternudge}}, and \code{\link{position_stacknudge}}
+  for examples and details of their use.
+}
+
 \examples{
 
 # Same output as with geom_point()
@@ -121,8 +171,5 @@ ggplot(mpg[1:50, ],
 
 }
 \seealso{
-\code{\link[ggplot2]{geom_point}}, \code{\link{geom_text_s}},
-  \code{\link{position_nudge_keep}}, \code{\link{position_nudge_to}},
-  \code{\link{position_jitternudge}}, \code{\link{position_dodgenudge}} and
-  \code{\link{position_stacknudge}}.
+\code{\link[ggplot2]{geom_point}}.
 }

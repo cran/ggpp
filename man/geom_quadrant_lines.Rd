@@ -34,8 +34,8 @@ geom_vhlines(
 }
 \arguments{
 \item{mapping}{The aesthetic mapping, usually constructed with
-\code{\link[ggplot2]{aes}} or \code{\link[ggplot2]{aes_}}. Only needs to be
-set at the layer level if you are overriding the plot defaults.}
+\code{\link[ggplot2]{aes}}. Only needs to be set at the layer level if you
+are overriding the plot defaults.}
 
 \item{data}{A layer specific data set - only needed if you want to override
 the plot defaults.}
@@ -132,6 +132,7 @@ ggplot(my.data, aes(x, y)) +
   \code{geom_vline()} and \code{geom_hline()} are described.
 
 Other Functions for quadrant and volcano plots: 
+\code{\link{stat_panel_counts}()},
 \code{\link{stat_quadrant_counts}()}
 }
 \concept{Functions for quadrant and volcano plots}

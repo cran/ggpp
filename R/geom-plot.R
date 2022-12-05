@@ -2,9 +2,14 @@
 #'
 #' \code{geom_plot} and \code{geom_plot_npc} add ggplot objects as insets to the
 #' base ggplot, using syntax similar to that of
-#' \code{\link[ggplot2]{geom_label}}  and \code{\link{geom_text_s}}. In most
-#' respects they behave as any other ggplot geometry: a layer con contain
-#' multiple tables and faceting works as usual.
+#' \code{\link[ggplot2]{geom_label}}  and \code{\link{geom_text_s}}.
+#' In most respects they behave as any other ggplot geometry: they add a layer
+#' containing one or more grobs and grouping and faceting works as usual. The
+#' most common use of \code{geom_plot} is to add data labels that are themselves
+#' ggplots rather than text. \code{\link{geom_plot_npc}} is used to add ggplots
+#' as annotations to plots, but contrary to layer function \code{annotate()},
+#' \code{\link{geom_plot_npc}} is data driven and respects grouping and facets,
+#' thus plot insets can differ among panels.
 #'
 #' @details You can modify the size of inset plots with the \code{vp.width} and
 #'   \code{vp.height} aesthetics. These can take a number between 0 (smallest
@@ -34,36 +39,19 @@
 #'   coordinates in the data, and \code{angle} is used to rotate the plot as a
 #'   whole.
 #'
-#'   In the case of \code{geom_table_npc()}, \code{npcx} and \code{npcy}
+#'   In the case of \code{geom_plot_npc()}, \code{npcx} and \code{npcy}
 #'   aesthetics determine the position of the inset plot. Justification as
 #'   described above for .
 #'
-#'   Use \code{\link{annotate}} as redefined in 'ggpp' when adding inset plots
-#'   as annotations (automatically available unless 'ggpp' is not attached).
-#'   \code{\link[ggplot2]{annotate}} cannot be used with \code{geom = "plot"}.
+#' @inheritSection geom_text_s Alignment
 #'
-#' @section Alignment: You can modify the alignment of the plot with the `vjust`
-#'   and `hjust` aesthetics. These can either be a number between 0
-#'   (right/bottom) and 1 (top/left) or a character (\code{"left"},
-#'   \code{"middle"}, \code{"right"}, \code{"bottom"}, \code{"center"},
-#'   \code{"top"}). In addition, you can use special alignments for
-#'   justification including \code{"inward"} and \code{"outward"}. Inward always
-#'   aligns text towards the center of the plotting area, and outward aligns it
-#'   away from the center of the plotting area. If tagged with \code{_mean} or
-#'   \code{_median} (e.g., \code{"outward_mean"}) the mean or median of the data
-#'   in the panel along the corresponding axis is used as center. If the
-#'   characters following the underscore represent a number (e.g.,
-#'   \code{"outward_10.5"}) the reference point will be this value in data
-#'   units.
+#' @inheritSection geom_text_s Position functions
 #'
-#' @seealso \code{\link{geom_plot}}, \code{\link{geom_table}},
-#'   \code{\link{annotate}}, \code{\link{position_nudge_keep}},
-#'   \code{\link{position_nudge_to}}, \code{\link{position_jitternudge}},
-#'   \code{\link{position_dodgenudge}} and \code{\link{position_stacknudge}}.
+#' @inherit geom_grob return note seealso references
 #'
 #' @param mapping The aesthetic mapping, usually constructed with
-#'   \code{\link[ggplot2]{aes}} or \code{\link[ggplot2]{aes_}}. Only needs to be
-#'   set at the layer level if you are overriding the plot defaults.
+#'   \code{\link[ggplot2]{aes}}. Only needs to be set at the layer level if you
+#'   are overriding the plot defaults.
 #' @param data A layer specific data set - only needed if you want to override
 #'   the plot defaults.
 #' @param stat The statistical transformation to use on the data for this layer,
@@ -85,35 +73,28 @@
 #' @param nudge_x,nudge_y Horizontal and vertical adjustments to nudge the
 #'   starting position of each text label. The units for \code{nudge_x} and
 #'   \code{nudge_y} are the same as for the data units on the x-axis and y-axis.
+#' @param default.colour A colour definition to use for elements not targeted by
+#'   the colour aesthetic.
+#' @param colour.target A vector of character strings; \code{"all"},
+#'   \code{"text"}, \code{"box"} and \code{"segment"}.
+#' @param default.alpha numeric in [0..1] A transparency value to use for
+#'   elements not targeted by the alpha aesthetic.
+#' @param alpha.target A vector of character strings; \code{"all"},
+#'   \code{"text"}, \code{"segment"}, \code{"box"}, \code{"box.line"}, and
+#'   \code{"box.fill"}.
 #' @param add.segments logical Display connecting segments or arrows between
 #'   original positions and displaced ones if both are available.
+#' @param box.padding,point.padding numeric By how much each end of the segments
+#'   should shortened in mm.
+#' @param segment.linewidth numeric Width of the segments or arrows in mm.
+#' @param min.segment.length numeric Segments shorter that the minimum length
+#'   are not rendered, in mm.
 #' @param arrow specification for arrow heads, as created by
 #'   \code{\link[grid]{arrow}}
 #'
-#' @section Known problem!: In some cases when explicit coordinates are added to
-#'   the inner plot, it may be also necessary to add explicitly coordinates to
-#'   the outer plots.
-#'
-#' @details The "width" and "height" of an inset as for a text element are 0, so
-#'   stacking and dodging inset plots will not work by default, and axis limits
-#'   are not automatically expanded to include all inset plots. Obviously,
-#'   insets do have height and width, but they are physical units, not data
-#'   units. The amount of space they occupy on the main plot is not constant in
-#'   data units of the base plot: when you modify scale limits, inset plots stay
-#'   the same size relative to the physical size of the base plot.
-#'
-#' @note The inset plots are stored nested within the main ggplot object and
-#'   contain their own copy of the data are rendered as grid grobs as normal
-#'   ggplots at the time the main ggplot is rendered. They can have different
-#'   themes.
-#'
-#' @references The idea of implementing a \code{geom_custom()} for grobs has
-#'   been discussed as an issue at
-#'   \url{https://github.com/tidyverse/ggplot2/issues/1399}.
+#' @inheritSection geom_grob Plot boundaries and clipping
 #'
 #' @family geometries adding layers with insets
-#'
-#' @return A plot layer instance.
 #'
 #' @export
 #'
@@ -154,15 +135,25 @@
 #'             nudge_x = -1, nudge_y = - 7,
 #'             hjust = 0.5, vjust = 0.5,
 #'             arrow = arrow(length = unit(0.5, "lines")),
-#'             segment.colour = "red",
+#'             colour = "red",
 #'             vp.width = 1/5, vp.height = 1/5)
 #'
-geom_plot <- function(mapping = NULL, data = NULL,
-                      stat = "identity", position = "identity",
+geom_plot <- function(mapping = NULL,
+                      data = NULL,
+                      stat = "identity",
+                      position = "identity",
                       ...,
                       nudge_x = 0,
                       nudge_y = 0,
+                      default.colour = "black",
+                      colour.target = "segment",
+                      default.alpha = 1,
+                      alpha.target = "segment",
                       add.segments = TRUE,
+                      box.padding = 0.25,
+                      point.padding = 1e-06,
+                      segment.linewidth = 0.5,
+                      min.segment.length = 0,
                       arrow = NULL,
                       na.rm = FALSE,
                       show.legend = FALSE,
@@ -172,11 +163,9 @@ geom_plot <- function(mapping = NULL, data = NULL,
     if (!missing(position) && position != "identity") {
       rlang::abort("You must specify either `position` or `nudge_x`/`nudge_y`.")
     }
-    # We do not keep the original positions if they will not be used
+    # original position needed for "position" justification
     position <-
-      position_nudge_center(nudge_x, nudge_y,
-                            kept.origin = ifelse(add.segments,
-                                                 "original", "none"))
+      position_nudge_center(nudge_x, nudge_y, kept.origin = "original")
   }
 
   ggplot2::layer(
@@ -188,7 +177,15 @@ geom_plot <- function(mapping = NULL, data = NULL,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
+      default.colour = default.colour,
+      colour.target = colour.target,
+      default.alpha = default.alpha,
+      alpha.target = alpha.target,
       add.segments = add.segments,
+      box.padding = box.padding,
+      point.padding = point.padding,
+      segment.linewidth = segment.linewidth,
+      min.segment.length = min.segment.length,
       arrow = arrow,
       na.rm = na.rm,
       ...
@@ -206,7 +203,15 @@ gplot_draw_panel_fun <-
            panel_params,
            coord,
            add.segments = TRUE,
+           box.padding = 0.25,
+           point.padding = 1e-06,
+           segment.linewidth = 1,
+           min.segment.length = 0,
            arrow = NULL,
+           default.colour = "black",
+           colour.target = "all",
+           default.alpha = 1,
+           alpha.target = "all",
            na.rm = FALSE) {
 
     if (nrow(data) == 0) {
@@ -246,12 +251,25 @@ gplot_draw_panel_fun <-
                        just = data$hjust,
                        a = "x", b = "y")
     }
+    if (add.segments) {
+      segments.data <-
+        shrink_segments(data,
+                        point.padding = point.padding,
+                        box.padding = box.padding,
+                        min.segment.length = min.segment.length)
+    }
 
     # loop needed as gpar is not vectorized
     all.grobs <- grid::gList()
 
     for (row.idx in 1:nrow(data)) {
       row <- data[row.idx, , drop = FALSE]
+      plot.alpha <-
+        ifelse(any(alpha.target %in% c("all", "plot")),
+               row$alpha, default.alpha)
+      segment.alpha <-
+        ifelse(any(alpha.target %in% c("all", "segment")),
+               row$alpha, default.alpha)
       user.grob <- ggplot2::ggplotGrob(x = data$label[[row.idx]])
 
       user.grob$vp <-
@@ -268,22 +286,30 @@ gplot_draw_panel_fun <-
       user.grob$name <- paste("inset.plot", row.idx, sep = ".")
 
       if (add.segments) {
-        segment.grob <-
-          grid::segmentsGrob(x0 = row$x,
-                             y0 = row$y,
-                             x1 = row$x_orig,
-                             y1 = row$y_orig,
-                             arrow = arrow,
-                             gp = grid::gpar(col = ggplot2::alpha(row$segment.colour,
-                                                                  row$segment.alpha)),
-                             name = paste("inset.plot.segment", row.idx, sep = "."))
+        segment.row <- segments.data[row.idx, , drop = FALSE]
+        if (segment.row$too.short) {
+          segment.grob <- grid::nullGrob()
+        } else {
+          segment.grob <-
+            grid::segmentsGrob(x0 = segment.row$x,
+                               y0 = segment.row$y,
+                               x1 = segment.row$x_orig,
+                               y1 = segment.row$y_orig,
+                               arrow = arrow,
+                               gp = grid::gpar(
+                                 col = if (segment.linewidth == 0) NA else # lwd = 0 is invalid in 'grid'
+                                   ifelse(any(colour.target %in% c("all", "segment")),
+                                          ggplot2::alpha(row$colour, segment.alpha),
+                                          ggplot2::alpha(default.colour, segment.alpha)),
+                                 lwd = (if (segment.linewidth == 0) 1 else segment.linewidth) * .stroke),
+                               name = paste("plot.s.segment", row$group, row.idx, sep = "."))
+        }
         all.grobs <- grid::gList(all.grobs, segment.grob, user.grob)
       } else {
         all.grobs <- grid::gList(all.grobs, user.grob)
       }
     }
-
-#    grid::grobTree(children = all.grobs, name = "geom.plot.panel")
+  #    grid::grobTree(children = all.grobs, name = "geom.plot.panel")
     grid::grobTree(children = all.grobs)
 
   }
@@ -305,11 +331,7 @@ GeomPlot <-
             family = "",
             fontface = 1,
             vp.width = 0.4,
-            vp.height = 0.4,
-            segment.linetype = 1,
-            segment.colour = "grey33",
-            segment.size = 0.5,
-            segment.alpha = 1
+            vp.height = 0.4
           ),
 
           draw_panel = gplot_draw_panel_fun,
@@ -321,8 +343,10 @@ GeomPlot <-
 #' @rdname geom_plot
 #' @export
 #'
-geom_plot_npc <- function(mapping = NULL, data = NULL,
-                          stat = "identity", position = "identity",
+geom_plot_npc <- function(mapping = NULL,
+                          data = NULL,
+                          stat = "identity",
+                          position = "identity",
                           ...,
                           na.rm = FALSE,
                           show.legend = FALSE,

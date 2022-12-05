@@ -7,8 +7,8 @@
 #' personality" as both annotations and geometries.
 #'
 #' @param mapping The aesthetic mapping, usually constructed with
-#'   \code{\link[ggplot2]{aes}} or \code{\link[ggplot2]{aes_}}. Only needs to be
-#'   set at the layer level if you are overriding the plot defaults.
+#'   \code{\link[ggplot2]{aes}}. Only needs to be set at the layer level if you
+#'   are overriding the plot defaults.
 #' @param data A layer specific dataset - only needed if you want to override
 #'   the plot defaults.
 #' @param stat The statistical transformation to use on the data for this layer,
@@ -37,9 +37,16 @@
 #'   the marginal points. If these are set, data, mapping and show.legend are
 #'   overridden.
 #'
+#' @inheritSection geom_text_s Alignment
+#'
+#' @inheritSection geom_text_s Position functions
+#'
 #' @family Geometries for marginal annotations in ggplots
 #'
 #' @return A plot layer instance.
+#'
+#' @seealso \code{\link[grid]{grid-package}}, \code{\link[ggplot2]{geom_rug}},
+#'   and other documentation of package 'ggplot2'.
 #'
 #' @export
 #'

@@ -31,8 +31,7 @@ the plot defaults.}
 
 \item{geom}{The geometric object to use display the data}
 
-\item{position}{The position adjustment to use for overlapping points on this
-layer}
+\item{position}{The position adjustment to use on this layer}
 
 \item{quadrants}{integer vector indicating which quadrants are of interest,
 with a \code{OL} indicating the whole plot.}
@@ -134,7 +133,7 @@ if (gginnards.installed) {
 
 ggplot(my.data, aes(x, y)) +
  geom_point() +
- stat_quadrant_counts(aes(label = sprintf("\%i observations", stat(count)))) +
+ stat_quadrant_counts(aes(label = sprintf("\%i observations", after_stat(count)))) +
  expand_limits(y = 12.7)
 
 ggplot(my.data, aes(x, y)) +
@@ -157,11 +156,12 @@ ggplot(my.data, aes(x, y)) +
 
 ggplot(my.data, aes(x, y)) +
   geom_point() +
-  stat_quadrant_counts(geom = "text") # use "tex" instead
+  stat_quadrant_counts(geom = "text") # use geom_text()
 
 }
 \seealso{
 Other Functions for quadrant and volcano plots: 
-\code{\link{geom_quadrant_lines}()}
+\code{\link{geom_quadrant_lines}()},
+\code{\link{stat_panel_counts}()}
 }
 \concept{Functions for quadrant and volcano plots}
