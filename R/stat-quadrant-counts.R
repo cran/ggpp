@@ -60,7 +60,8 @@
 #'   \item{quadrant}{integer, one of 0:4} \item{x}{x value of label position in
 #'   data units} \item{y}{y value of label position in data units} \item{npcx}{x
 #'   value of label position in npc units} \item{npcy}{y value of label position
-#'   in npc units} \item{count}{number of  observations} }.
+#'   in npc units} \item{count}{number of  observations}
+#'   \item{count.label}{number of observations as character} }.
 #'
 #'   As shown in one example below \code{\link[gginnards]{geom_debug}} can be
 #'   used to print the computed values returned by any statistic. The output
@@ -129,7 +130,7 @@ stat_quadrant_counts <- function(mapping = NULL,
                                  geom = "text_npc",
                                  position = "identity",
                                  quadrants = NULL,
-                                 pool.along = "none",
+                                 pool.along = c("none", "x", "y", "xy"),
                                  xintercept = 0,
                                  yintercept = 0,
                                  label.x = NULL,
@@ -138,9 +139,13 @@ stat_quadrant_counts <- function(mapping = NULL,
                                  show.legend = FALSE,
                                  inherit.aes = TRUE, ...) {
 
-  stopifnot(pool.along %in% c("none", "x", "y"))
-  stopifnot(length(xintercept) == 1 && length(yintercept) == 1)
-  stopifnot(length(quadrants) <= 4)
+  pool.along <- rlang::arg_match(pool.along)
+  if (!is.null(pool.along) && pool.along == "xy") {
+    quadrants <- 0L # consistent UI with other stats from 'ggpp'
+  }
+  stopifnot("'xintercept' should have length == 1L" = length(xintercept) <= 1,
+            "'yintercept' should have length == 1L" = length(yintercept) <= 1)
+  stopifnot("Length of 'quadrants' shoul be between 0 and 4" = length(quadrants) <= 4)
   stopifnot(is.null(label.x) || is.numeric(label.x) || is.character(label.x))
   stopifnot(is.null(label.y) || is.numeric(label.y) || is.character(label.y))
 
@@ -164,133 +169,134 @@ stat_quadrant_counts <- function(mapping = NULL,
 }
 
 #' @rdname ggpp-ggproto
-#'
-#' @format NULL
-#' @usage NULL
-#'
-compute_counts_fun <- function(data,
-                               scales,
-                               quadrants,
-                               pool.along,
-                               xintercept,
-                               yintercept,
-                               label.x,
-                               label.y) {
-
-  which_quadrant <- function(x, y) {
-    z <- ifelse(x >= xintercept & y >= yintercept,
-                1L,
-                ifelse(x >= xintercept & y < yintercept,
-                       2L,
-                       ifelse(x < xintercept & y < yintercept,
-                              3L,
-                              4L)))
-    if (pool.along == "x") {
-      z <- ifelse(z %in% c(1L, 4L), 1L, 2L)
-    } else if(pool.along == "y") {
-      z <- ifelse(z %in% c(1L, 2L), 1L, 4L)
-    }
-    z
-  }
-
-  force(data)
-  # compute range of whole data
-  range.x <- range(data$x)
-  range.y <- range(data$y)
-  # set position for labels in npc units
-  if (is.null(label.x)) {
-    if (pool.along == "x") {
-      label.x <- rep("centre", 2)
-    } else {
-      label.x <- c("left", "right")
-    }
-  }
-  if (is.null(label.y)) {
-    if (pool.along == "y") {
-      label.y <- rep("centre", 2)
-    } else {
-      label.y <- c("bottom", "top")
-    }
-  }
-
-  label.x <- compute_npcx(label.x)
-  label.y <- compute_npcy(label.y)
-
-  label.x <- range(label.x) # ensure length is always 2
-  label.y <- range(label.y) # ensure length is always 2
-
-  # dynamic default based on data range
-  if (is.null(quadrants)) {
-    if (all(range.x >= xintercept) && all(range.y >= yintercept)) {
-      quadrants <- 1L
-    } else if (all(range.x < xintercept) && all(range.y < yintercept)) {
-      quadrants <- 3L
-    } else if (all(range.x >= xintercept)) {
-      quadrants <- c(1L, 2L)
-    } else if (all(range.y >= yintercept)) {
-      quadrants <- c(1L, 4L)
-    } else {
-      quadrants <- c(1L, 2L, 3L, 4L)
-    }
-  }
-  if (pool.along == "x") {
-    quadrants <- intersect(quadrants, c(1L, 2L))
-  }
-  if (pool.along == "y") {
-    quadrants <- intersect(quadrants, c(1L, 4L))
-  }
-
-  if (all(is.na(quadrants)) || 0L %in% quadrants) {
-  # total count
-    tibble::tibble(quadrant = 0,
-                   count = nrow(data),
-                   npcx = label.x[2],
-                   npcy = label.y[2],
-                   x = range.x[2],
-                   y = range.y[2])
-  } else {
-  # counts for the selected quadrants
-    data %>%
-      dplyr::mutate(quadrant = which_quadrant(.data$x, .data$y)) %>%
-      dplyr::filter(.data$quadrant %in% quadrants) %>%
-      dplyr::group_by(.data$quadrant) %>%
-      dplyr::summarise(count = length(.data$x)) %>% # dplyr::n() triggers error
-      dplyr::ungroup() -> data
-
-    zero.count.quadrants <- setdiff(quadrants, data$quadrant)
-
-    if (length(zero.count.quadrants) > 0) {
-      data <-
-        rbind(data, tibble::tibble(quadrant = zero.count.quadrants, count = 0L))
-    }
-
-    data %>%
-      dplyr::mutate(npcx = ifelse(.data$quadrant %in% c(1L, 2L),
-                                  label.x[2],
-                                  label.x[1]),
-                    npcy = ifelse(.data$quadrant %in% c(1L, 4L),
-                                  label.y[2],
-                                  label.y[1]),
-                    x = ifelse(.data$quadrant %in% c(1L, 2L),
-                               range.x[2],
-                               range.x[1]),
-                    y = ifelse(.data$quadrant %in% c(1L, 4L),
-                               range.y[2],
-                               range.y[1]))
-   }
-}
-
-#' @rdname ggpp-ggproto
 #' @format NULL
 #' @usage NULL
 #' @export
 StatQuadrantCounts <-
   ggplot2::ggproto("StatQuadrantCounts", ggplot2::Stat,
-                   compute_panel = compute_counts_fun,
+
+                   compute_panel = function(data,
+                                            scales,
+                                            quadrants,
+                                            pool.along,
+                                            xintercept,
+                                            yintercept,
+                                            label.x,
+                                            label.y) {
+
+                     which_quadrant <- function(x, y) {
+                       z <- ifelse(x >= xintercept & y >= yintercept,
+                                   1L,
+                                   ifelse(x >= xintercept & y < yintercept,
+                                          2L,
+                                          ifelse(x < xintercept & y < yintercept,
+                                                 3L,
+                                                 4L)))
+                       if (pool.along == "x") {
+                         z <- ifelse(z %in% c(1L, 4L), 1L, 2L)
+                       } else if(pool.along == "y") {
+                         z <- ifelse(z %in% c(1L, 2L), 1L, 4L)
+                       }
+                       z
+                     }
+
+                     force(data)
+                     # compute range of whole data
+                     range.x <- range(data$x)
+                     range.y <- range(data$y)
+                     # set position for labels in npc units
+                     if (is.null(label.x)) {
+                       if (pool.along == "x") {
+                         label.x <- rep("centre", 2)
+                       } else {
+                         label.x <- c("left", "right")
+                       }
+                     }
+                     if (is.null(label.y)) {
+                       if (pool.along == "y") {
+                         label.y <- rep("centre", 2)
+                       } else {
+                         label.y <- c("bottom", "top")
+                       }
+                     }
+
+                     label.x <- compute_npcx(label.x)
+                     label.y <- compute_npcy(label.y)
+
+                     label.x <- range(label.x) # ensure length is always 2
+                     label.y <- range(label.y) # ensure length is always 2
+
+                     # dynamic default based on data range
+                     if (is.null(quadrants)) {
+                       if (all(range.x >= xintercept) && all(range.y >= yintercept)) {
+                         quadrants <- 1L
+                       } else if (all(range.x < xintercept) && all(range.y < yintercept)) {
+                         quadrants <- 3L
+                       } else if (all(range.x >= xintercept)) {
+                         quadrants <- c(1L, 2L)
+                       } else if (all(range.y >= yintercept)) {
+                         quadrants <- c(1L, 4L)
+                       } else {
+                         quadrants <- c(1L, 2L, 3L, 4L)
+                       }
+                     }
+                     if (pool.along == "x") {
+                       quadrants <- intersect(quadrants, c(1L, 2L))
+                     }
+                     if (pool.along == "y") {
+                       quadrants <- intersect(quadrants, c(1L, 4L))
+                     }
+
+                     if (all(is.na(quadrants)) || 0L %in% quadrants) {
+                       # total count
+                       z <-
+                         tibble::tibble(quadrant = 0,
+                                        count = nrow(data),
+                                        npcx = label.x[2],
+                                        npcy = label.y[2],
+                                        x = range.x[2],
+                                        y = range.y[2])
+                     } else {
+                       # counts for the selected quadrants
+                       data %>%
+                         dplyr::mutate(quadrant = which_quadrant(.data$x, .data$y)) %>%
+                         dplyr::filter(.data$quadrant %in% quadrants) %>%
+                         dplyr::group_by(.data$quadrant) %>%
+                         dplyr::summarise(count = length(.data$x)) %>% # dplyr::n() triggers error
+                         dplyr::ungroup() -> data
+
+                       zero.count.quadrants <- setdiff(quadrants, data$quadrant)
+
+                       if (length(zero.count.quadrants) > 0) {
+                         data <-
+                           rbind(data, tibble::tibble(quadrant = zero.count.quadrants, count = 0L))
+                       }
+
+                       data$count.label <- sprintf("n=%i", data$count)
+
+                       z <-
+                         data %>%
+                         dplyr::mutate(npcx = ifelse(.data$quadrant %in% c(1L, 2L),
+                                                     label.x[2],
+                                                     label.x[1]),
+                                       npcy = ifelse(.data$quadrant %in% c(1L, 4L),
+                                                     label.y[2],
+                                                     label.y[1]),
+                                       x = ifelse(.data$quadrant %in% c(1L, 2L),
+                                                  range.x[2],
+                                                  range.x[1]),
+                                       y = ifelse(.data$quadrant %in% c(1L, 4L),
+                                                  range.y[2],
+                                                  range.y[1]))
+                     }
+                     z$count.label <- sprintf("n=%i", z$count)
+                     z
+                   },
+
                    default_aes =
                      ggplot2::aes(npcx = ggplot2::after_stat(npcx),
                                   npcy = ggplot2::after_stat(npcy),
-                                  label = sprintf("n=%i", ggplot2::after_stat(count)),
+                                  label = ggplot2::after_stat(count.label),
                                   hjust = "inward",
                                   vjust = "inward"),
                    required_aes = c("x", "y")

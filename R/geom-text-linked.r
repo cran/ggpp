@@ -107,15 +107,16 @@
 #' @param nudge_x,nudge_y Horizontal and vertical adjustments to nudge the
 #'   starting position of each text label. The units for \code{nudge_x} and
 #'   \code{nudge_y} are the same as for the data units on the x-axis and y-axis.
-#' @param default.colour A colour definition to use for elements not targeted by
+#' @param default.colour,default.color A colour definition to use for elements not targeted by
 #'   the colour aesthetic.
-#' @param colour.target A vector of character strings; \code{"all"},
-#'   \code{"text"}, \code{"box"} and \code{"segment"}.
+#' @param colour.target,color.target A vector of character strings; \code{"all"},
+#'   \code{"text"}, \code{"segment"}, \code{"box"}, \code{"box.line"}, and
+#'   \code{"box.fill"} or \code{"none"}.
 #' @param default.alpha numeric in [0..1] A transparency value to use for
 #'   elements not targeted by the alpha aesthetic.
 #' @param alpha.target A vector of character strings; \code{"all"},
 #'   \code{"text"}, \code{"segment"}, \code{"box"}, \code{"box.line"}, and
-#'   \code{"box.fill"}.
+#'   \code{"box.fill"} or \code{"none"}.
 #' @param add.segments logical Display connecting segments or arrows between
 #'   original positions and displaced ones if both are available.
 #' @param box.padding,point.padding numeric By how much each end of the segments
@@ -255,15 +256,6 @@
 #' p +
 #'   geom_label_s(aes(colour = factor(cyl)),
 #'               nudge_x = 0.3,
-#'               colour.target = "text",
-#'               arrow = arrow(angle = 20,
-#'                             length = grid::unit(1/3, "lines"))) +
-#'   scale_colour_discrete(l = 40) + # luminance, make colours darker
-#'   expand_limits(x = 7)
-#'
-#' p +
-#'   geom_label_s(aes(colour = factor(cyl)),
-#'               nudge_x = 0.3,
 #'               colour.target = c("box", "segment"),
 #'               linewidth = 0.6,
 #'               arrow = arrow(angle = 20,
@@ -296,7 +288,9 @@ geom_text_s <- function(mapping = NULL,
                         nudge_x = 0,
                         nudge_y = 0,
                         default.colour = "black",
-                        colour.target = "all",
+                        default.color = default.colour,
+                        colour.target = "text",
+                        color.target = colour.target,
                         default.alpha = 1,
                         alpha.target = "all",
                         add.segments = TRUE,
@@ -308,8 +302,18 @@ geom_text_s <- function(mapping = NULL,
                         check_overlap = FALSE,
                         na.rm = FALSE,
                         show.legend = NA,
-                        inherit.aes = TRUE)
-{
+                        inherit.aes = TRUE) {
+
+  colour.target <-
+    rlang::arg_match(color.target,
+                     values = c("all", "text", "segment", "none"),
+                     multiple = TRUE)
+  alpha.target <-
+    rlang::arg_match(alpha.target,
+                     values = c("all", "text", "segment", "none"),
+                     multiple = TRUE)
+
+
   if (!missing(nudge_x) || !missing(nudge_y)) {
     if (!missing(position) && position != "identity") {
       rlang::abort("You must specify either `position` or `nudge_x`/`nudge_y`.")
@@ -329,7 +333,7 @@ geom_text_s <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       parse = parse,
-      default.colour = default.colour,
+      default.colour = default.color,
       colour.target = colour.target,
       default.alpha = default.alpha,
       alpha.target = alpha.target,
@@ -636,27 +640,32 @@ shrink_segments <- function(data,
                             box.padding = 0,
                             point.padding = 0,
                             min.segment.length = 0.5) {
-  stopifnot(box.padding >= 0 & point.padding >= 0 & (box.padding + point.padding) < 1)
+  stopifnot("'box.padding' must be >= 0" = box.padding >= 0,
+            "'point.padding' must be >= 0" =  point.padding >= 0,
+            "'box.padding + point.padding' must be < 1" =
+              (box.padding + point.padding) < 1)
   segments.data <- data[ , c("x_orig", "y_orig", "x", "y")]
   starting.length <- apply(segments.data, 1,
                            function(x) stats::dist(rbind(x[1:2], x[3:4])))
+
+  zero.len <- starting.length < max(1e-5, (point.padding + box.padding) / 100)
+
   # padding origin
   if (point.padding != 0) {
-    p <- point.padding / starting.length / 100
+    p <- point.padding / starting.length[!zero.len] / 100
     p <- 1 - p
-    segments.data[ , "x_orig"] <- data[ , "x"] + p * (data[ ,"x_orig"] - data[ , "x"])
-    segments.data[ , "y_orig"] <- data[ , "y"] + p * (data[ ,"y_orig"] - data[ , "y"])
+    segments.data[!zero.len, "x_orig"] <- data[!zero.len, "x"] + p * (data[!zero.len, "x_orig"] - data[!zero.len, "x"])
+    segments.data[!zero.len, "y_orig"] <- data[!zero.len, "y"] + p * (data[!zero.len, "y_orig"] - data[!zero.len, "y"])
   }
   # padding position
   if (box.padding != 0) {
-    p <- box.padding / starting.length / 100
+    p <- box.padding / starting.length[!zero.len] / 100
     p <- 1 - p
-    segments.data[ , "x"] <- data[ , "x_orig"] + p * (data[ ,"x"] - data[ , "x_orig"])
-    segments.data[ , "y"] <- data[ , "y_orig"] + p * (data[ ,"y"] - data[ , "y_orig"])
+    segments.data[!zero.len, "x"] <- data[!zero.len, "x_orig"] + p * (data[!zero.len, "x"] - data[!zero.len, "x_orig"])
+    segments.data[!zero.len, "y"] <- data[!zero.len, "y_orig"] + p * (data[!zero.len, "y"] - data[!zero.len, "y_orig"])
   }
   final.length <- apply(segments.data, 1,
                         function(x) stats::dist(rbind(x[1:2], x[3:4])))
   segments.data$too.short <- final.length < min.segment.length
   segments.data
 }
-

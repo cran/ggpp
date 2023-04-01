@@ -1,8 +1,8 @@
 Package: ggpp
 Type: Package
 Title: Grammar Extensions to 'ggplot2'
-Version: 0.5.1
-Date: 2023-02-03
+Version: 0.5.2
+Date: 2023-03-23
 Authors@R: 
     c(
     person("Pedro J.", "Aphalo", email = "pedro.aphalo@helsinki.fi", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3385-972X")),
@@ -24,13 +24,14 @@ License: GPL (>= 2)
 LazyLoad: TRUE
 ByteCompile: TRUE
 Depends: R (>= 4.0.0), ggplot2 (>= 3.3.6)
-Imports: stats, grid, grDevices, rlang (>= 0.4.7), magrittr (>= 1.5),
-        glue (>= 1.4.2), gridExtra (>= 2.3), scales (>= 1.1.1), tibble
-        (>= 3.0.3), dplyr (>= 1.0.2), xts (>= 0.12-0), zoo (>= 1.8-8),
-        MASS (>= 7.3-51.6), polynom (>= 1.4-0), lubridate (>= 1.7.9),
+Imports: stats, grid, grDevices, rlang (>= 1.0.6), magrittr (>= 2.0.1),
+        glue (>= 1.6.0), gridExtra (>= 2.3), scales (>= 1.2.0), tibble
+        (>= 3.1.8), dplyr (>= 1.1.0), xts (>= 0.13.0), zoo (>= 1.8-11),
+        MASS (>= 7.3-58), polynom (>= 1.4-0), lubridate (>= 1.9.0),
         stringr (>= 1.4.0)
-Suggests: knitr (>= 1.29), rmarkdown (>= 2.3), ggrepel (>= 0.9.2),
-        gginnards(>= 0.1.0), magick (>= 2.6.0)
+Suggests: knitr (>= 1.40), rmarkdown (>= 2.20), ggrepel (>= 0.9.2),
+        gginnards(>= 0.1.1), magick (>= 2.7.3), testthat (>= 3.1.5),
+        vdiffr (>= 1.0.5)
 URL: https://docs.r4photobiology.info/ggpp/,
         https://github.com/aphalo/ggpp
 BugReports: https://github.com/aphalo/ggpp/issues
@@ -38,11 +39,11 @@ Encoding: UTF-8
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-02-03 14:24:32 UTC; aphalo_2
+Packaged: 2023-04-01 19:33:45 UTC; aphalo_2
 Author: Pedro J. Aphalo [aut, cre] (<https://orcid.org/0000-0003-3385-972X>),
   Kamil Slowikowski [ctb] (<https://orcid.org/0000-0002-2843-6370>),
   Michał Krassowski [ctb] (<https://orcid.org/0000-0002-9638-7785>),
   Daniel Sabanés Bové [ctb],
   Stella Banjo [ctb]
 Repository: CRAN
-Date/Publication: 2023-02-03 16:32:32 UTC
+Date/Publication: 2023-04-01 20:00:02 UTC
