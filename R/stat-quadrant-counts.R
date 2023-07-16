@@ -35,6 +35,7 @@
 #'   quadrants.
 #' @param label.x,label.y \code{numeric} Coordinates (in npc units) to be used
 #'   for absolute positioning of the labels.
+#' @param digits integer Number of digits for fraction and percent labels.
 #'
 #' @details This statistic can be used to automatically count observations in
 #'   each of the four quadrants of a plot, and by default add these counts as
@@ -60,8 +61,11 @@
 #'   \item{quadrant}{integer, one of 0:4} \item{x}{x value of label position in
 #'   data units} \item{y}{y value of label position in data units} \item{npcx}{x
 #'   value of label position in npc units} \item{npcy}{y value of label position
-#'   in npc units} \item{count}{number of  observations}
-#'   \item{count.label}{number of observations as character} }.
+#'   in npc units} \item{count}{number of  observations in the quadrant(s)}
+#'   \item{total}{number of onservations in data}
+#'   \item{count.label}{number of observations as character}
+#'   \item{pc.label}{percent of observations as character}
+#'   \item{fr.label}{fraction of observations as character} }.
 #'
 #'   As shown in one example below \code{\link[gginnards]{geom_debug}} can be
 #'   used to print the computed values returned by any statistic. The output
@@ -79,13 +83,102 @@
 #'
 #' # generate artificial data
 #' set.seed(4321)
-#' x <- 1:100
-#' y <- rnorm(length(x), mean = 10)
+#' x <- -50:50
+#' y <- rnorm(length(x), mean = 0)
 #' my.data <- data.frame(x, y)
+#'
+#' # using automatically generated text labels, default origin at (0, 0)
 #'
 #' ggplot(my.data, aes(x, y)) +
 #'   geom_point() +
+#'   geom_quadrant_lines() +
 #'   stat_quadrant_counts()
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_point() +
+#'   geom_quadrant_lines() +
+#'   stat_quadrant_counts(aes(label = after_stat(pc.label)))
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_point() +
+#'   geom_quadrant_lines() +
+#'   stat_quadrant_counts(aes(label = after_stat(fr.label)))
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_point() +
+#'   geom_quadrant_lines() +
+#'   stat_quadrant_counts(aes(label = after_stat(dec.label)))
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'  geom_point() +
+#'   geom_quadrant_lines() +
+#'   stat_quadrant_counts(aes(label = sprintf("%i observations", after_stat(count)))) +
+#'   scale_y_continuous(expand = expansion(c(0.05, 0.15))) # reserve space
+#'
+#' # user specified origin
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_quadrant_lines(colour = "blue", xintercept = 10, yintercept = -1) +
+#'   stat_quadrant_counts(colour = "blue", xintercept = 10, yintercept = -1) +
+#'   geom_point() +
+#'   scale_y_continuous(expand = expansion(mult = 0.15))
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_quadrant_lines(colour = "blue", xintercept = 10, yintercept = -1) +
+#'   stat_quadrant_counts(aes(label = after_stat(pc.label)),
+#'                        colour = "blue", xintercept = 10, yintercept = -1) +
+#'   geom_point() +
+#'   scale_y_continuous(expand = expansion(mult = 0.15))
+#'
+#' # more digits in labels
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_quadrant_lines(colour = "blue", xintercept = 10, yintercept = -1) +
+#'   stat_quadrant_counts(aes(label = after_stat(pc.label)), digits = 3,
+#'                        colour = "blue", xintercept = 10, yintercept = -1) +
+#'   geom_point() +
+#'   scale_y_continuous(expand = expansion(mult = 0.15))
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_quadrant_lines(colour = "blue", xintercept = 10, yintercept = -1) +
+#'   stat_quadrant_counts(aes(label = after_stat(fr.label)),
+#'                        colour = "blue", xintercept = 10, yintercept = -1) +
+#'   geom_point() +
+#'   scale_y_continuous(expand = expansion(mult = 0.15))
+#'
+#' # grouped quadrants
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_quadrant_lines(colour = "blue",
+#'                       pool.along = "x") +
+#'   stat_quadrant_counts(colour = "blue", label.x = "right",
+#'                        pool.along = "x") +
+#'   geom_point() +
+#'   scale_y_continuous(expand = expansion(mult = 0.15))
+#'
+#' # whole panel
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_point() +
+#'   stat_quadrant_counts(quadrants = 0, label.x = "left", label.y = "bottom") +
+#'   scale_y_continuous(expand = expansion(mult = c(0.15, 0.05)))
+#'
+#' # use a different geometry
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_point() +
+#'   stat_quadrant_counts(geom = "text") # use geom_text()
+#'
+#' # Numeric values can be used to build labels with alternative formats
+#' # Here with sprintf(), but paste() and format() also work.
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'   geom_quadrant_lines(colour = "blue") +
+#'   stat_quadrant_counts(aes(label = sprintf("%i of %i genes",
+#'                        after_stat(count), after_stat(total))),
+#'                        colour = "blue") +
+#'   geom_point() +
+#'   scale_y_continuous(expand = expansion(mult = 0.15))
 #'
 #' # We use geom_debug() to see the computed values
 #'
@@ -96,34 +189,11 @@
 #'   ggplot(my.data, aes(x, y)) +
 #'     geom_point() +
 #'     stat_quadrant_counts(geom = "debug")
+#'
+#'   ggplot(my.data, aes(x, y)) +
+#'     geom_point() +
+#'     stat_quadrant_counts(geom = "debug", xintercept = 50)
 #' }
-#'
-#' ggplot(my.data, aes(x, y)) +
-#'  geom_point() +
-#'  stat_quadrant_counts(aes(label = sprintf("%i observations", after_stat(count)))) +
-#'  expand_limits(y = 12.7)
-#'
-#' ggplot(my.data, aes(x, y)) +
-#'   geom_quadrant_lines(colour = "blue", xintercept = 50, yintercept = 10) +
-#'   stat_quadrant_counts(colour = "blue", xintercept = 50, yintercept = 10) +
-#'   geom_point() +
-#'   scale_y_continuous(expand = expansion(mult = 0.15, add = 0))
-#'
-#' ggplot(my.data, aes(x, y)) +
-#'   geom_quadrant_lines(colour = "blue",
-#'                        pool.along = "x", yintercept = 10) +
-#'   stat_quadrant_counts(colour = "blue", label.x = "right",
-#'                        pool.along = "x", yintercept = 10) +
-#'   geom_point() +
-#'   expand_limits(y = c(7, 13))
-#'
-#' ggplot(my.data, aes(x, y)) +
-#'   geom_point() +
-#'   stat_quadrant_counts(quadrants = 0, label.x = "left", label.y = "bottom")
-#'
-#' ggplot(my.data, aes(x, y)) +
-#'   geom_point() +
-#'   stat_quadrant_counts(geom = "text") # use geom_text()
 #'
 stat_quadrant_counts <- function(mapping = NULL,
                                  data = NULL,
@@ -135,9 +205,11 @@ stat_quadrant_counts <- function(mapping = NULL,
                                  yintercept = 0,
                                  label.x = NULL,
                                  label.y = NULL,
+                                 digits = 2,
                                  na.rm = FALSE,
                                  show.legend = FALSE,
-                                 inherit.aes = TRUE, ...) {
+                                 inherit.aes = TRUE,
+                                 ...) {
 
   pool.along <- rlang::arg_match(pool.along)
   if (!is.null(pool.along) && pool.along == "xy") {
@@ -164,6 +236,7 @@ stat_quadrant_counts <- function(mapping = NULL,
                   yintercept = yintercept,
                   label.x = label.x,
                   label.y = label.y,
+                  digits = digits,
                   ...)
   )
 }
@@ -182,7 +255,8 @@ StatQuadrantCounts <-
                                             xintercept,
                                             yintercept,
                                             label.x,
-                                            label.y) {
+                                            label.y,
+                                            digits = 2) {
 
                      which_quadrant <- function(x, y) {
                        z <- ifelse(x >= xintercept & y >= yintercept,
@@ -247,11 +321,14 @@ StatQuadrantCounts <-
                        quadrants <- intersect(quadrants, c(1L, 4L))
                      }
 
+                     num.obs <- nrow(data)
+
                      if (all(is.na(quadrants)) || 0L %in% quadrants) {
                        # total count
                        z <-
                          tibble::tibble(quadrant = 0,
-                                        count = nrow(data),
+                                        count = num.obs,
+                                        total = num.obs,
                                         npcx = label.x[2],
                                         npcy = label.y[2],
                                         x = range.x[2],
@@ -265,14 +342,24 @@ StatQuadrantCounts <-
                          dplyr::summarise(count = length(.data$x)) %>% # dplyr::n() triggers error
                          dplyr::ungroup() -> data
 
+                       data$total <- num.obs
+
                        zero.count.quadrants <- setdiff(quadrants, data$quadrant)
 
                        if (length(zero.count.quadrants) > 0) {
                          data <-
-                           rbind(data, tibble::tibble(quadrant = zero.count.quadrants, count = 0L))
+                           rbind(data, tibble::tibble(quadrant = zero.count.quadrants, count = 0L, total = num.obs))
                        }
 
                        data$count.label <- sprintf("n=%i", data$count)
+                       data$pc.label <- sprintf("p=%.*f%%",
+                                                digits - 2,
+                                                data$count / data$total * 100)
+                       data$dec.label <- sprintf("f=%.*f",
+                                                 digits,
+                                                 data$count / data$total)
+                       data$fr.label <- sprintf("%i / %i",
+                                                data$count, data$total)
 
                        z <-
                          data %>%

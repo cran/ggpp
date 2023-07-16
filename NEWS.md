@@ -6,6 +6,16 @@ editor_options:
     wrap: 72
 ---
 
+# ggpp 0.5.3
+
+-   Add support for percent and fraction of observations to `stat_quadrant_counts()` 
+and `stat_group_counts()`.
+-   Fix bug in `stat_group_counts()`: mismatch between counts and groups.
+-   Add `stat_functions()`, a replacement for `ggplot2::stat_function()` that fully 
+complies with the grammar of graphics, supporting multiple functions per layer,
+grouping and facets.
+-   Add examples to documentation.
+
 # ggpp 0.5.2
 
 -   Fix bug in `stat_dens2d_labels()`, `stat_dens2d_filter()`,

@@ -27,6 +27,7 @@ stat_group_counts(
   label.y = "top",
   hstep = 0,
   vstep = NULL,
+  digits = 2,
   na.rm = FALSE,
   show.legend = FALSE,
   inherit.aes = TRUE,
@@ -66,6 +67,8 @@ can include aesthetics whose values you want to set, not map. See
 
 \item{hstep, vstep}{numeric in npc units, the horizontal and vertical step
 used between labels for different groups.}
+
+\item{digits}{integer Number of digits for fraction and percent labels.}
 }
 \value{
 A plot layer instance. Using as output \code{data} the counts of
@@ -95,6 +98,13 @@ These statistics can be used to automatically count observations in
   the same length as the number of panels in the figure can be used if
   needed.
 }
+\note{
+If a factor is mapped to \code{x} or to \code{y} aesthetics each level
+  of the factor constitutes a group, in this case the default positioning and
+  geom using NPC pseudo aesthetics will have to be overriden by passing
+  \code{geom = "text"} and data coordinates used. The default for factors
+  may change in the future.
+}
 \section{Computed variables}{
  Data frame with one or more rows, one for each
   group of observations for which counts are counted in \code{data}. \describe{
@@ -111,12 +121,14 @@ These statistics can be used to automatically count observations in
 
 \examples{
 
-# generate artificial data
+# generate artificial data with numeric x and y
 set.seed(67821)
 x <- 1:100
 y <- rnorm(length(x), mean = 10)
 group <- factor(rep(c("A", "B"), times = 50))
 my.data <- data.frame(x, y, group)
+
+# using automatically generated text labels
 
 ggplot(my.data, aes(x, y)) +
   geom_point() +
@@ -134,6 +146,85 @@ ggplot(my.data, aes(x, y, colour = group)) +
   geom_point() +
   stat_group_counts(label.x = "left", hstep = 0.06, vstep = 0)
 
+ggplot(my.data, aes(x, y, colour = group)) +
+  geom_point() +
+  stat_group_counts(aes(label = after_stat(pc.label)))
+
+ggplot(my.data, aes(x, y, colour = group)) +
+  geom_point() +
+  stat_group_counts(aes(label = after_stat(pc.label)), digits = 3)
+
+ggplot(my.data, aes(x, y, colour = group)) +
+  geom_point() +
+  stat_group_counts(aes(label = after_stat(fr.label)))
+
+ggplot(my.data, aes(x, y, colour = group)) +
+  geom_point() +
+  stat_group_counts(aes(label = after_stat(dec.label)))
+
+# one of x or y can be a factor
+# label.x or label.y along the factor can be set to "factor" together
+# with the use of geom_text()
+
+ggplot(mpg,
+       aes(factor(cyl), hwy)) +
+  stat_boxplot() +
+  stat_group_counts(geom = "text",
+                    label.y = 10,
+                    label.x = "factor") +
+  stat_panel_counts()
+
+# Numeric values can be used to build labels with alternative formats
+# Here with sprintf(), but paste() and format() also work.
+
+ggplot(my.data, aes(x, y)) +
+ geom_point() +
+ stat_panel_counts(aes(label = sprintf("\%i observations",
+                                       after_stat(count)))) +
+ scale_y_continuous(expand = expansion(mult = c(0.05, 0.12)))
+
+ggplot(mpg,
+       aes(factor(cyl), hwy)) +
+  stat_boxplot() +
+  stat_group_counts(geom = "text",
+                    aes(label = sprintf("(\%i)", after_stat(count))),
+                    label.y = 10,
+                    label.x = "factor")
+
+ggplot(mpg,
+       aes(factor(cyl), hwy)) +
+  stat_boxplot() +
+  stat_group_counts(aes(label = sprintf("n[\%i]~`=`~\%i",
+                                        after_stat(x), after_stat(count))),
+                    parse = TRUE,
+                    geom = "text",
+                    label.y = 10,
+                    label.x = "factor") +
+  stat_panel_counts(aes(label = sprintf("sum(n[i])~`=`~\%i",
+                                        after_stat(count))),
+                    parse = TRUE)
+
+# label position
+
+ggplot(my.data, aes(y)) +
+  stat_panel_counts(label.x = "left") +
+  stat_density(alpha = 0.5)
+
+ggplot(my.data, aes(y, colour = group)) +
+  stat_group_counts(label.y = "top") +
+  stat_density(aes(fill = group), alpha = 0.3)
+
+# The numeric value can be used as a label as is
+
+ggplot(mpg,
+       aes(factor(cyl), hwy)) +
+  stat_boxplot() +
+  stat_group_counts(geom = "text",
+                    aes(label = after_stat(count)),
+                    label.x = "factor",
+                    label.y = 10) +
+  annotate(geom = "text", x = 0.55, y = 10, label = "n[i]~`=`", parse = TRUE)
+
 # We use geom_debug() to see the computed values
 
 gginnards.installed <- requireNamespace("gginnards", quietly = TRUE)
@@ -143,25 +234,13 @@ if (gginnards.installed) {
   ggplot(my.data, aes(x, y)) +
     geom_point() +
     stat_panel_counts(geom = "debug")
+}
 
+if (gginnards.installed) {
   ggplot(my.data, aes(x, y, colour = group)) +
     geom_point() +
     stat_group_counts(geom = "debug")
-
 }
-
-ggplot(my.data, aes(x, y)) +
- geom_point() +
- stat_panel_counts(aes(label = sprintf("\%i observations", after_stat(count)))) +
- expand_limits(y = 12.7)
-
-ggplot(my.data, aes(y)) +
-  stat_panel_counts(label.x = "left") +
-  stat_density()
-
-ggplot(my.data, aes(y, colour = group)) +
-  stat_group_counts(label.y = "top") +
-  stat_density(aes(fill = group))
 
 }
 \seealso{

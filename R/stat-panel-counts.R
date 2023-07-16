@@ -56,6 +56,12 @@
 #'   shown includes also values mapped to aesthetics, like \code{label} in the
 #'   example. \code{x} and \code{y} are included in the output only if mapped.
 #'
+#' @note  If a factor is mapped to \code{x} or to \code{y} aesthetics each level
+#'   of the factor constitutes a group, in this case the default positioning and
+#'   geom using NPC pseudo aesthetics will have to be overriden by passing
+#'   \code{geom = "text"} and data coordinates used. The default for factors
+#'   may change in the future.
+#'
 #' @return A plot layer instance. Using as output \code{data} the counts of
 #'   observations in each plot panel or per group in each plot panel.
 #'
@@ -65,12 +71,14 @@
 #'
 #' @examples
 #'
-#' # generate artificial data
+#' # generate artificial data with numeric x and y
 #' set.seed(67821)
 #' x <- 1:100
 #' y <- rnorm(length(x), mean = 10)
 #' group <- factor(rep(c("A", "B"), times = 50))
 #' my.data <- data.frame(x, y, group)
+#'
+#' # using automatically generated text labels
 #'
 #' ggplot(my.data, aes(x, y)) +
 #'   geom_point() +
@@ -88,6 +96,85 @@
 #'   geom_point() +
 #'   stat_group_counts(label.x = "left", hstep = 0.06, vstep = 0)
 #'
+#' ggplot(my.data, aes(x, y, colour = group)) +
+#'   geom_point() +
+#'   stat_group_counts(aes(label = after_stat(pc.label)))
+#'
+#' ggplot(my.data, aes(x, y, colour = group)) +
+#'   geom_point() +
+#'   stat_group_counts(aes(label = after_stat(pc.label)), digits = 3)
+#'
+#' ggplot(my.data, aes(x, y, colour = group)) +
+#'   geom_point() +
+#'   stat_group_counts(aes(label = after_stat(fr.label)))
+#'
+#' ggplot(my.data, aes(x, y, colour = group)) +
+#'   geom_point() +
+#'   stat_group_counts(aes(label = after_stat(dec.label)))
+#'
+#' # one of x or y can be a factor
+#' # label.x or label.y along the factor can be set to "factor" together
+#' # with the use of geom_text()
+#'
+#' ggplot(mpg,
+#'        aes(factor(cyl), hwy)) +
+#'   stat_boxplot() +
+#'   stat_group_counts(geom = "text",
+#'                     label.y = 10,
+#'                     label.x = "factor") +
+#'   stat_panel_counts()
+#'
+#' # Numeric values can be used to build labels with alternative formats
+#' # Here with sprintf(), but paste() and format() also work.
+#'
+#' ggplot(my.data, aes(x, y)) +
+#'  geom_point() +
+#'  stat_panel_counts(aes(label = sprintf("%i observations",
+#'                                        after_stat(count)))) +
+#'  scale_y_continuous(expand = expansion(mult = c(0.05, 0.12)))
+#'
+#' ggplot(mpg,
+#'        aes(factor(cyl), hwy)) +
+#'   stat_boxplot() +
+#'   stat_group_counts(geom = "text",
+#'                     aes(label = sprintf("(%i)", after_stat(count))),
+#'                     label.y = 10,
+#'                     label.x = "factor")
+#'
+#' ggplot(mpg,
+#'        aes(factor(cyl), hwy)) +
+#'   stat_boxplot() +
+#'   stat_group_counts(aes(label = sprintf("n[%i]~`=`~%i",
+#'                                         after_stat(x), after_stat(count))),
+#'                     parse = TRUE,
+#'                     geom = "text",
+#'                     label.y = 10,
+#'                     label.x = "factor") +
+#'   stat_panel_counts(aes(label = sprintf("sum(n[i])~`=`~%i",
+#'                                         after_stat(count))),
+#'                     parse = TRUE)
+#'
+#' # label position
+#'
+#' ggplot(my.data, aes(y)) +
+#'   stat_panel_counts(label.x = "left") +
+#'   stat_density(alpha = 0.5)
+#'
+#' ggplot(my.data, aes(y, colour = group)) +
+#'   stat_group_counts(label.y = "top") +
+#'   stat_density(aes(fill = group), alpha = 0.3)
+#'
+#' # The numeric value can be used as a label as is
+#'
+#' ggplot(mpg,
+#'        aes(factor(cyl), hwy)) +
+#'   stat_boxplot() +
+#'   stat_group_counts(geom = "text",
+#'                     aes(label = after_stat(count)),
+#'                     label.x = "factor",
+#'                     label.y = 10) +
+#'   annotate(geom = "text", x = 0.55, y = 10, label = "n[i]~`=`", parse = TRUE)
+#'
 #' # We use geom_debug() to see the computed values
 #'
 #' gginnards.installed <- requireNamespace("gginnards", quietly = TRUE)
@@ -97,25 +184,13 @@
 #'   ggplot(my.data, aes(x, y)) +
 #'     geom_point() +
 #'     stat_panel_counts(geom = "debug")
+#' }
 #'
+#' if (gginnards.installed) {
 #'   ggplot(my.data, aes(x, y, colour = group)) +
 #'     geom_point() +
 #'     stat_group_counts(geom = "debug")
-#'
 #' }
-#'
-#' ggplot(my.data, aes(x, y)) +
-#'  geom_point() +
-#'  stat_panel_counts(aes(label = sprintf("%i observations", after_stat(count)))) +
-#'  expand_limits(y = 12.7)
-#'
-#' ggplot(my.data, aes(y)) +
-#'   stat_panel_counts(label.x = "left") +
-#'   stat_density()
-#'
-#' ggplot(my.data, aes(y, colour = group)) +
-#'   stat_group_counts(label.y = "top") +
-#'   stat_density(aes(fill = group))
 #'
 stat_panel_counts <- function(mapping = NULL,
                               data = NULL,
@@ -161,7 +236,7 @@ StatPanelCounts <-
                                             npc.used) {
 
                      force(data)
-                     # total count
+                     # total count (works because NAs have been already removed)
                      z <- tibble::tibble(count = nrow(data))
                      # label position
                      if (is.character(label.x)) {
@@ -236,6 +311,7 @@ StatPanelCounts <-
 #'
 #' @param hstep,vstep numeric in npc units, the horizontal and vertical step
 #'   used between labels for different groups.
+#' @param digits integer Number of digits for fraction and percent labels.
 #'
 #' @export
 #'
@@ -247,9 +323,11 @@ stat_group_counts <- function(mapping = NULL,
                               label.y = "top",
                               hstep = 0,
                               vstep = NULL,
+                              digits = 2,
                               na.rm = FALSE,
                               show.legend = FALSE,
-                              inherit.aes = TRUE, ...) {
+                              inherit.aes = TRUE,
+                              ...) {
 
   stopifnot(is.null(label.x) || is.numeric(label.x) || is.character(label.x))
   stopifnot(is.null(label.y) || is.numeric(label.y) || is.character(label.y))
@@ -265,6 +343,7 @@ stat_group_counts <- function(mapping = NULL,
     params = list(na.rm = na.rm,
                   label.x = label.x,
                   label.y = label.y,
+                  digits = digits,
                   hstep = hstep,
                   vstep = ifelse(is.null(vstep),
                                  ifelse(grepl("label", geom),
@@ -283,87 +362,116 @@ stat_group_counts <- function(mapping = NULL,
 StatGroupCounts <-
   ggplot2::ggproto("StatGroupCounts", ggplot2::Stat,
 
-                   compute_group = function(data,
+                   compute_panel = function(data,
                                             params,
                                             scales,
                                             label.x,
                                             label.y,
+                                            digits = 2,
                                             vstep,
                                             hstep,
                                             npc.used) {
 
                      force(data)
 
+                     # Build group labels
                      if (exists("grp.label", data)) {
                        if (length(unique(data[["grp.label"]])) > 1L) {
                          warning("Non-unique value in 'data$grp.label' using group index ", data[["group"]][1], " as label.")
-                         grp.label <- as.character(data[["group"]][1])
+                         grp.label <- as.character(unique(data[["group"]]))
                        } else {
-                         grp.label <- data[["grp.label"]][1]
+                         grp.label <- unique(data[["grp.label"]])
                        }
                      } else {
                        # if nothing mapped to grp.label we use group index as label
-                       grp.label <- as.character(data[["group"]][1])
+                       grp.label <- as.character(unique(data[["group"]]))
                      }
 
-                     # Build group labels
-                     group.idx <- abs(data$group[1])
-                     if (length(label.x) >= group.idx) {
-                       label.x <- label.x[group.idx]
+                     # validate label positions
+                     group.idx <- abs(unique(data$group))
+                     if (length(label.x) >= length(group.idx)) {
+                       label.x <- label.x[1:length(group.idx)]
                      } else if (length(label.x) > 0) {
                        label.x <- label.x[1]
                      }
-                     if (length(label.y) >= group.idx) {
-                       label.y <- label.y[group.idx]
+                     if (length(label.y) >= length(group.idx)) {
+                       label.y <- label.y[1:length(group.idx)]
                      } else if (length(label.y) > 0) {
                        label.y <- label.y[1]
                      }
 
                      # Compute number of observations
-                     z <- tibble::tibble(count = nrow(data))
+                     # (works because NAs have been already removed)
+                     z <- data.frame()
+
+                     for (g in unique(data$group)) {
+                       temp <- cbind(data[data$group == g, ][ 1, ], count = sum(data$group == g))
+                       z <- rbind(z, temp)
+                     }
+
+                     z$total <- nrow(data)
+
+                     z$count.label <- sprintf("n=%i", z$count)
+                     z$pc.label <- sprintf("p=%.*f%%",
+                                           digits - 2,
+                                           z$count / z$total * 100)
+                     z$dec.label <- sprintf("f=%.*f",
+                                            digits,
+                                            z$count / z$total)
+                     z$fr.label <- sprintf("%i / %i",
+                                           z$count, z$total)
 
                      # Compute label positions
                      if (is.character(label.x)) {
-                       if (npc.used) {
-                         margin.npc <- 0.05
+                       if (label.x[1] == "factor") {
+                         label.x <- z$group
                        } else {
-                         # margin set by scale
-                         margin.npc <- 0
-                       }
-                       label.x <- compute_npcx(x = label.x, group = group.idx, h.step = hstep,
-                                               margin.npc = margin.npc)
-                       if (!npc.used) {
-                         if ("x" %in% colnames(data)) {
-                           x.expanse <- abs(diff(range(data$x)))
-                           x.min <- min(data$x)
-                           label.x <- label.x * x.expanse + x.min
+                         if (npc.used) {
+                           margin.npc <- 0.05
                          } else {
-                           if (data$PANEL[1] == 1L && group.idx == 1L) { # show only once
-                             message("No 'x' mapping; 'label.x' requires a numeric argument in data units")
+                           # margin set by scale
+                           margin.npc <- 0
+                         }
+                         label.x <- compute_npcx(x = label.x, group = group.idx, h.step = hstep,
+                                                 margin.npc = margin.npc)
+                         if (!npc.used) {
+                           if ("x" %in% colnames(data)) {
+                             x.expanse <- abs(diff(range(data$x)))
+                             x.min <- min(data$x)
+                             label.x <- label.x * x.expanse + x.min
+                           } else {
+                             if (data$PANEL[1] == 1L && group.idx == 1L) { # show only once
+                               message("No 'x' mapping; 'label.x' requires a numeric argument in data units")
+                             }
+                             label.x <- NA_real_
                            }
-                           label.x <- NA_real_
                          }
                        }
                      }
+
                      if (is.character(label.y)) {
-                       if (npc.used) {
-                         margin.npc <- 0.05
+                       if (label.y[1] == "factor") {
+                         label.x <- z$group
                        } else {
-                         # margin set by scale
-                         margin.npc <- 0
-                       }
-                       label.y <- compute_npcy(y = label.y, group = group.idx, v.step = vstep,
-                                               margin.npc = margin.npc)
-                       if (!npc.used) {
-                         if ("y" %in% colnames(data)) {
-                           y.expanse <- abs(diff(range(data$y)))
-                           y.min <- min(data$y)
-                           label.y <- label.y * y.expanse + y.min
+                         if (npc.used) {
+                           margin.npc <- 0.05
                          } else {
-                           if (data$PANEL[1] == 1L && group.idx == 1L) { # show only once
-                             message("No 'y' mapping; 'label.y' requires a numeric argument in data units")
+                           # margin set by scale
+                           margin.npc <- 0
+                         }
+                         label.y <- compute_npcy(y = label.y, group = group.idx, v.step = vstep,
+                                                 margin.npc = margin.npc)
+                         if (!npc.used) {
+                           if ("y" %in% colnames(data)) {
+                             y.expanse <- abs(diff(range(data$y)))
+                             y.min <- min(data$y)
+                             label.y <- label.y * y.expanse + y.min
+                           } else {
+                             if (data$PANEL[1] == 1L && group.idx == 1L) { # show only once
+                               message("No 'y' mapping; 'label.y' requires a numeric argument in data units")
+                             }
+                             label.y <- NA_real_
                            }
-                           label.y <- NA_real_
                          }
                        }
                      }

@@ -171,6 +171,7 @@ it easy to annotate plots with the number of observations.
 | `stat_apply_group()`     | cummulative summaries      | `geom_point()`, `geom_line()`, etc.                              | scatter and line plots | group       |
 | `stat_centroid()`        | joint x and y summaries    | `geom_point()`, `geom_rug()`, `geom_margin_arrow()`, etc.        | data summary           | group       |
 | `stat_summary_xy()`      | joint x and y summaries    | `geom_point()`, `geom_rug()`, `geom_margin_arrow()`, etc.        | data summary           | group       |
+| `stat_functions()`       | compute y from x range     | `geom_line()`, `geom_point()`, etc.                              | draw function curves   | group       |
 
 Statistics defined in package ‘ggpp’
 
@@ -261,13 +262,15 @@ ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
 
 ![](man/figures/README-unnamed-chunk-1-1.png)<!-- -->
 
-Medians computed on-the-fly shown as marginal arrows.
+Medians computed on-the-fly shown as marginal arrows. Labels with number
+of observations per group.
 
 ``` r
 ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
   geom_point() +
   stat_centroid(geom = "y_margin_arrow", .fun = median,
-                aes(yintercept = after_stat(y)), arrow.length = 0.05)
+                aes(yintercept = after_stat(y)), arrow.length = 0.05) +
+  stat_group_counts(vstep = 0, hstep = 0.09)
 ```
 
 ![](man/figures/README-unnamed-chunk-2-1.png)<!-- -->
