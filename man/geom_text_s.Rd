@@ -15,7 +15,9 @@ geom_label_s(
   nudge_x = 0,
   nudge_y = 0,
   default.colour = "black",
+  default.color = default.colour,
   colour.target = c("text", "box"),
+  color.target = colour.target,
   default.alpha = 1,
   alpha.target = "all",
   label.padding = grid::unit(0.25, "lines"),
@@ -232,6 +234,16 @@ Geometries \code{geom_text_s()} and \code{geom_label_s()} have an
   \code{\link[ggplot2]{aes_linetype_size_shape}},
   \code{\link[ggplot2]{aes_position}}, and
   \code{\link[ggplot2]{aes_group_order}}.
+
+  In 'ggplot2' \code{linewidth} when applied to the border of the box drawn
+  by \code{geom_label()} is given in points rather than in mm because of a
+  historical error in the code. In other geometries such as
+  \code{geom_segment()} \code{linewidth} is given in mm. As in
+  \code{geom_label_s()} it is important to remain consistent among
+  different \code{linewidth} specifications, mm are used both for the box
+  border and linking segment. To imitate the behaviour of \code{geom_label()}
+  a correction factor of 0.75 (more exactly 1 pt = 0.7528 mm) can be used for
+  the line width of the border of the box.
 }
 
 \section{Position functions}{

@@ -1,11 +1,11 @@
-#' @rdname geom_text_s
+#' @rdname geom_text_pairwise
 #'
 #' @param label.padding Amount of padding around label. Defaults to 0.25 lines.
 #' @param label.r Radius of rounded corners. Defaults to 0.15 lines.
 #'
 #' @export
 #'
-geom_label_s <-
+geom_label_pairwise <-
   function(mapping = NULL,
            data = NULL,
            stat = "identity",
@@ -16,21 +16,17 @@ geom_label_s <-
            nudge_y = 0,
            default.colour = "black",
            default.color = default.colour,
-           colour.target = c("text", "box"),
+           colour.target = "all",
            color.target = colour.target,
            default.alpha = 1,
-           alpha.target = "all",
+           alpha.target = "segment",
            label.padding = grid::unit(0.25, "lines"),
            label.r = grid::unit(0.15, "lines"),
            segment.linewidth = 0.5,
-           add.segments = TRUE,
-           box.padding = 1e-06,
-           point.padding = 1e-06,
-           min.segment.length = 0,
            arrow = NULL,
            na.rm = FALSE,
-           show.legend = NA,
-           inherit.aes = TRUE) {
+           show.legend = FALSE,
+           inherit.aes = FALSE) {
 
     colour.target <-
       rlang::arg_match(color.target,
@@ -47,15 +43,15 @@ geom_label_s <-
       if (!missing(position) && position != "identity") {
         rlang::abort("You must specify either `position` or `nudge_x`/`nudge_y`.")
       }
-      # by default we keep the original positions
-      position <- position_nudge_keep(nudge_x, nudge_y)
+      # by default we do not keep the original positions
+      position <- ggplot2::position_nudge(nudge_x, nudge_y)
     }
 
     ggplot2::layer(
     data = data,
     mapping = mapping,
     stat = stat,
-    geom = GeomLabelS,
+    geom = GeomLabelPairwise,
     position = position,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
@@ -68,10 +64,6 @@ geom_label_s <-
       label.padding = label.padding,
       label.r = label.r,
       segment.linewidth = segment.linewidth,
-      add.segments = add.segments,
-      box.padding = box.padding,
-      point.padding = point.padding,
-      min.segment.length = min.segment.length,
       arrow = arrow,
       na.rm = na.rm,
       ...
@@ -83,20 +75,21 @@ geom_label_s <-
 #' @format NULL
 #' @usage NULL
 #' @export
-GeomLabelS <-
-  ggplot2::ggproto("GeomLabelS", ggplot2::Geom,
-                   required_aes = c("x", "y", "label"),
+GeomLabelPairwise <-
+  ggplot2::ggproto("GeomLabelPairwise", ggplot2::Geom,
+                   required_aes = c("xmin", "xmax", "y", "label"),
 
                    default_aes = ggplot2::aes(
+                     x = NA_real_,
                      colour = "black",
                      fill = "white",
                      size = 3.88,
                      angle = 0, # currently ignored
-                     linewidth = 0.25,
+                     linewidth = 0.5, # same as segment.linewidth default
                      linetype = "solid",
-                     hjust = "position",
-                     vjust = "position",
-                     alpha = 0.75, # ensure that occluded data are visible by default
+                     hjust = 0.5,
+                     vjust = 0.5,
+                     alpha = 1,
                      family = "",
                      fontface = 1,
                      lineheight = 1.2
@@ -105,20 +98,14 @@ GeomLabelS <-
                    draw_panel = function(data, panel_params, coord, #panel_scales,
                                          parse = FALSE,
                                          na.rm = FALSE,
-                                         add.segments = TRUE,
                                          default.colour = "black",
                                          colour.target = "all",
                                          default.alpha = 1,
                                          alpha.target = "fill",
-                                         box.padding = 0.25,
-                                         point.padding = 1e-06,
-                                         min.segment.length = 0,
                                          segment.linewidth = 0.5,
                                          arrow = NULL,
                                          label.padding = unit(0.25, "lines"),
                                          label.r = unit(0.15, "lines")) {
-
-                     add.segments <- add.segments && all(c("x_orig", "y_orig") %in% colnames(data))
 
                      data$label <- as.character(data$label)
                      data <- subset(data, !is.na(label) & label != "")
@@ -156,18 +143,14 @@ GeomLabelS <-
                                         a = "x", b = "y")
                      }
 
-                     if (add.segments) {
-                       segments.data <-
-                         shrink_segments(data,
-                                         point.padding = point.padding,
-                                         box.padding = box.padding,
-                                         min.segment.length = min.segment.length)
-                     }
                      # loop needed as gpar is not vectorized
                      all.grobs <- grid::gList()
 
                      for (row.idx in 1:nrow(data)) {
                        row <- data[row.idx, , drop = FALSE]
+                       if (is.na(row$x)) {
+                         row$x <- (row$xmin + row$xmax) / 2
+                       }
                        text.alpha <-
                          ifelse(any(alpha.target %in% c("all", "text")),
                                 row$alpha, default.alpha)
@@ -210,32 +193,31 @@ GeomLabelS <-
                        # give unique name to each grob
                        user.grob$name <- paste("text.s.grob", row$group, row.idx, sep = ".")
 
-                       if (add.segments) {
-                         segment.row <- segments.data[row.idx, , drop = FALSE]
-                         if (segment.row$too.short) {
-                           segment.grob <- grid::nullGrob()
-                         } else {
-                           segment.grob <-
-                             grid::segmentsGrob(x0 = segment.row$x,
-                                                y0 = segment.row$y,
-                                                x1 = segment.row$x_orig,
-                                                y1 = segment.row$y_orig,
-                                                arrow = arrow,
-                                                gp = grid::gpar(
-                                                  col = if (segment.linewidth == 0) NA else # lwd = 0 is invalid in 'grid'
-                                                    ifelse(any(colour.target %in% c("all", "segment")),
-                                                           ggplot2::alpha(row$colour, segment.alpha),
-                                                           ggplot2::alpha(default.colour, segment.alpha)),
-                                                  lwd = (if (segment.linewidth == 0) 0.5 else segment.linewidth) * ggplot2::.stroke),
-                                                name = paste("text.s.segment", row$group, row.idx, sep = "."))
-                         }
-                         all.grobs <- grid::gList(all.grobs, segment.grob, user.grob)
+                       if (!is.null(arrow) && !inherits(arrow, "arrow")) {
+                         shape <- arrow[[1]]
+                         arrow <- NULL
                        } else {
-                         all.grobs <- grid::gList(all.grobs, user.grob)
+                         shape <- NULL
                        }
+
+                       segment.grob <-
+                         grid::segmentsGrob(x0 = row$xmin,
+                                            y0 = row$y,
+                                            x1 = row$xmax,
+                                            y1 = row$y,
+                                            arrow = arrow,
+                                            gp = grid::gpar(
+                                              col = if (segment.linewidth == 0) NA else # lwd = 0 is invalid in 'grid'
+                                                ifelse(any(colour.target %in% c("all", "segment")),
+                                                       ggplot2::alpha(row$colour, segment.alpha),
+                                                       ggplot2::alpha(default.colour, segment.alpha)),
+                                              lwd = (if (segment.linewidth == 0) 0.5 else segment.linewidth) * ggplot2::.stroke),
+                                            name = paste("text.s.segment", row$group, row.idx, sep = "."))
+                       all.grobs <- grid::gList(all.grobs, segment.grob, user.grob)
                      }
 
-                     # name needs to be unique within plot, so we would to know layer
+
+                     # name needs to be unique within plot, so we would have to know layer name to use as basis
                      #                     grid::grobTree(children = all.grobs, name = "geom.text.s.panel")
                      grid::grobTree(children = all.grobs)
 
@@ -243,22 +225,3 @@ GeomLabelS <-
 
                    draw_key = draw_key_text
   )
-
-labelGrob <-
-  function(label, x = grid::unit(0.5, "npc"), y = grid::unit(0.5, "npc"),
-           just = "center", padding = grid::unit(0.25, "lines"), r = grid::unit(0.1, "snpc"),
-           default.units = "npc", name = NULL,
-           text.gp = grid::gpar(), rect.gp = grid::gpar(fill = "white"), vp = NULL) {
-
-    if (length(label) != 1) {
-      rlang::abort("label must be of length 1")
-    }
-
-    if (!grid::is.unit(x))
-      x <- grid::unit(x, default.units)
-    if (!grid::is.unit(y))
-      y <- grid::unit(y, default.units)
-
-    grid::gTree(label = label, x = x, y = y, just = just, padding = padding, r = r,
-                name = name, text.gp = text.gp, rect.gp = rect.gp, vp = vp, cl = "labelgrob")
-  }

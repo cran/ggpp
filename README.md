@@ -45,21 +45,23 @@ the original data position to the displaced position where the data
 label is anchored. These requires also a change in the behaviour of
 position functions, that we will describe in the next section.
 
-| Geometry                                   | Main use                        | Aesthetics                                                                                                | Segment |
-|--------------------------------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------|---------|
-| `geom_text_s()`                            | data labels                     | x, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                           | yes     |
-| `geom_label_s()`                           | data labels                     | x, y, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust       | yes     |
-| `geom_text_npc()`                          | annotations                     | npcx, npcy, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                     | no      |
-| `geom_label_npc()`                         | annotations                     | npcx, npcy, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust | no      |
-| `geom_point_s()`                           | data labels                     | x, y, size, colour, fill, alpha, shape, stroke, group                                                     | yes     |
-| `geom_table()`                             | data labels                     | x, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                           | yes     |
-| `geom_table_npc()`                         | annotations                     | npcx, npcy, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                     | no      |
-| `geom_plot()` , `geom_grob()`              | data labels                     | x, y, label, group, angle, vjust, hjust                                                                   | yes     |
-| `geom_plot_npc()` , `geom_grob_npc()`      | annotations                     | npcx, npcy, label, group, vjust, hjust                                                                    | no      |
-| `geom_margin_arrow()`                      | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                | no      |
-| `geom_margin_point()`                      | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                | no      |
-| `geom_margin_grob()`                       | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                | no      |
-| `geom_quadrant_lines()` , `geom_vhlines()` | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                | no      |
+| Geometry                                   | Main use                        | Aesthetics                                                                                                      | Segment |
+|--------------------------------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------|---------|
+| `geom_text_s()`                            | data labels                     | x, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                                 | yes     |
+| `geom_label_s()`                           | data labels                     | x, y, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust             | yes     |
+| `geom_text_pairwise()`                     | data labels                     | x, xmin, xmax, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                     | horiz.  |
+| `geom_label_pairwise()`                    | data labels                     | x, xmin, xmax, y, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust | horiz.  |
+| `geom_text_npc()`                          | annotations                     | npcx, npcy, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                           | no      |
+| `geom_label_npc()`                         | annotations                     | npcx, npcy, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust       | no      |
+| `geom_point_s()`                           | data labels                     | x, y, size, colour, fill, alpha, shape, stroke, group                                                           | yes     |
+| `geom_table()`                             | data labels                     | x, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                                 | yes     |
+| `geom_table_npc()`                         | annotations                     | npcx, npcy, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                           | no      |
+| `geom_plot()` , `geom_grob()`              | data labels                     | x, y, label, group, angle, vjust, hjust                                                                         | yes     |
+| `geom_plot_npc()` , `geom_grob_npc()`      | annotations                     | npcx, npcy, label, group, vjust, hjust                                                                          | no      |
+| `geom_margin_arrow()`                      | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
+| `geom_margin_point()`                      | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
+| `geom_margin_grob()`                       | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
+| `geom_quadrant_lines()` , `geom_vhlines()` | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
 
 Geometries defined in package ‘ggpp’
 
@@ -152,28 +154,28 @@ and passing them to a geom.
 The statistics `stat_quadrant_counts()` and `stat_panel_counts()` make
 it easy to annotate plots with the number of observations.
 
-| Statistic                | Main use                   | Usual geometries                                                 | Most used with         | Computed by |
-|--------------------------|----------------------------|------------------------------------------------------------------|------------------------|-------------|
-| `stat_fmt_tb()`          | formatting and selection   | `geom_table()`                                                   | tables as data labels  | group       |
-| `stat_fmt_tb()`          | formatting and selection   | `geom_table_npc()`                                               | tables as annotations  | group       |
-| `stat_dens2d_filter()`   | local 2D density filtering | `geom_text_s()`, `geom_label_s()`, `geom_text()`, `geom_label()` | text as data labels    | panel       |
-| `stat_dens2d_label()`    | local 2D density filtering | `geom_text_repel()`, `geom_label_repel()`                        | text as data labels    | panel       |
-| `stat_dens1d_filter()`   | local 1D density filtering | `geom_text_s()`, `geom_label_s()`, `geom_text()`, `geom_label()` | text as data labels    | panel       |
-| `stat_dens1d_label()`    | local 1D density filtering | `geom_text_repel()`, `geom_label_repel()`                        | text as data labels    | panel       |
-| `stat_dens2d_filter_g()` | local 2D density filtering | `geom_text_s()`, `geom_label_s()`, `geom_text()`, `geom_label()` | text as data labels    | group       |
-| `stat_dens2d_label_g()`  | local 2D density filtering | `geom_text_repel()`, `geom_label_repel()`                        | text as data labels    | group       |
-| `stat_dens1d_filter_g()` | local 1D density filtering | `geom_text_s()`, `geom_label_s()`, `geom_text()`, `geom_label()` | text as data labels    | group       |
-| `stat_dens1d_label_g()`  | local 1D density filtering | `geom_text_repel()`, `geom_label_repel()`                        | data labels            | group       |
-| `stat_panel_counts()`    | number of observations     | `geom_text()`, `geom_label()`                                    | text as annotation     | panel       |
-| `stat_group_counts()`    | number of observations     | `geom_text()`, `geom_label()`                                    | text as annotation     | group       |
-| `stat_quadrant_counts()` | number of observations     | `geom_text()`, `geom_label()`                                    | text as annotation     | group       |
-| `stat_apply_panel()`     | cummulative summaries      | `geom_point()`, `geom_line()`, etc.                              | scatter and line plots | panel       |
-| `stat_apply_group()`     | cummulative summaries      | `geom_point()`, `geom_line()`, etc.                              | scatter and line plots | group       |
-| `stat_centroid()`        | joint x and y summaries    | `geom_point()`, `geom_rug()`, `geom_margin_arrow()`, etc.        | data summary           | group       |
-| `stat_summary_xy()`      | joint x and y summaries    | `geom_point()`, `geom_rug()`, `geom_margin_arrow()`, etc.        | data summary           | group       |
-| `stat_functions()`       | compute y from x range     | `geom_line()`, `geom_point()`, etc.                              | draw function curves   | group       |
+| Statistic                | Main use                   | Usual geometries                                                 | Most used with         | Compute function |
+|--------------------------|----------------------------|------------------------------------------------------------------|------------------------|------------------|
+| `stat_fmt_tb()`          | formatting and selection   | `geom_table()`                                                   | tables as data labels  | group            |
+| `stat_fmt_tb()`          | formatting and selection   | `geom_table_npc()`                                               | tables as annotations  | group            |
+| `stat_dens2d_filter()`   | local 2D density filtering | `geom_text_s()`, `geom_label_s()`, `geom_text()`, `geom_label()` | text as data labels    | panel            |
+| `stat_dens2d_label()`    | local 2D density filtering | `geom_text_repel()`, `geom_label_repel()`                        | text as data labels    | panel            |
+| `stat_dens1d_filter()`   | local 1D density filtering | `geom_text_s()`, `geom_label_s()`, `geom_text()`, `geom_label()` | text as data labels    | panel            |
+| `stat_dens1d_label()`    | local 1D density filtering | `geom_text_repel()`, `geom_label_repel()`                        | text as data labels    | panel            |
+| `stat_dens2d_filter_g()` | local 2D density filtering | `geom_text_s()`, `geom_label_s()`, `geom_text()`, `geom_label()` | text as data labels    | group            |
+| `stat_dens2d_label_g()`  | local 2D density filtering | `geom_text_repel()`, `geom_label_repel()`                        | text as data labels    | group            |
+| `stat_dens1d_filter_g()` | local 1D density filtering | `geom_text_s()`, `geom_label_s()`, `geom_text()`, `geom_label()` | text as data labels    | group            |
+| `stat_dens1d_label_g()`  | local 1D density filtering | `geom_text_repel()`, `geom_label_repel()`                        | data labels            | group            |
+| `stat_panel_counts()`    | number of observations     | `geom_text()`, `geom_label()`                                    | text as annotation     | panel            |
+| `stat_group_counts()`    | number of observations     | `geom_text()`, `geom_label()`                                    | text as annotation     | panel            |
+| `stat_quadrant_counts()` | number of observations     | `geom_text()`, `geom_label()`                                    | text as annotation     | panel            |
+| `stat_apply_panel()`     | cummulative summaries      | `geom_point()`, `geom_line()`, etc.                              | scatter and line plots | panel            |
+| `stat_apply_group()`     | cummulative summaries      | `geom_point()`, `geom_line()`, etc.                              | scatter and line plots | group            |
+| `stat_centroid()`        | joint x and y summaries    | `geom_point()`, `geom_rug()`, `geom_margin_arrow()`, etc.        | data summary           | group            |
+| `stat_summary_xy()`      | joint x and y summaries    | `geom_point()`, `geom_rug()`, `geom_margin_arrow()`, etc.        | data summary           | group            |
+| `stat_functions()`       | compute y from x range     | `geom_line()`, `geom_point()`, etc.                              | draw function curves   | group            |
 
-Statistics defined in package ‘ggpp’
+Statistics defined in package ‘ggpp’.
 
 ## Justification
 

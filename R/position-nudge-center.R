@@ -19,6 +19,7 @@
 #'
 #' @param x,y Amount of vertical and horizontal distance to move. A numeric
 #'   vector of length 1, or of the same length as rows there are in \code{data},
+#'   with nudge values in data rows order.
 #' @param center_x,center_y The coordinates of the virtual origin out from which
 #'   nudging radiates or splits in opposite directions. A numeric vector of
 #'   length 1 or of the same length as rows there are in \code{data}, or a
@@ -249,6 +250,22 @@ position_nudge_center <-
     if (is.null(obey_grouping)) {
       # default needs to be set in panel_function when we have access to data
       obey_grouping <- NA
+    }
+
+    if (lubridate::is.duration(x)) {
+      x <- as.numeric(x)
+    }
+    if (lubridate::is.duration(y)) {
+      y <- as.numeric(y)
+    }
+    # this works as long as center coords and mapped variable are of the same class
+    # ggplot2's behaviour has been in the past and seems to be again to expect
+    # numeric seconds for POSIXct and numeric days for Date time shifts
+    if (lubridate::is.instant(center_x)) {
+      x <- as.numeric(center_x)
+    }
+    if (lubridate::is.instant(center_y)) {
+      y <- as.numeric(center_y)
     }
 
     ggplot2::ggproto(NULL, PositionNudgeCenter,
