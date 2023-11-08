@@ -1,4 +1,4 @@
-## ---- include=FALSE, echo=FALSE-----------------------------------------------
+## ----include=FALSE, echo=FALSE------------------------------------------------
 library(knitr)
 opts_chunk$set(fig.align = 'center', 
                fig.show = 'hold', fig.width = 7, fig.height = 4)
@@ -7,13 +7,13 @@ options(warnPartialMatchArgs = FALSE,
         tibble.print.min = 4,
         dplyr.summarise.inform = FALSE)
 
-## ---- message=FALSE-----------------------------------------------------------
+## ----message=FALSE------------------------------------------------------------
 library(ggpp)
 library(tibble)
 library(dplyr)
 eval_magick <- requireNamespace("magick", quietly = TRUE)
 
-## ---- message=FALSE-----------------------------------------------------------
+## ----message=FALSE------------------------------------------------------------
 old_theme <- theme_set(theme_bw() + theme(panel.grid = element_blank()))
 
 ## -----------------------------------------------------------------------------
@@ -174,7 +174,7 @@ ggplot(mpg, aes(displ, hwy, colour = factor(cyl))) +
        colour = "Engine cylinders\n(number)") +
   theme_bw()
 
-## ---- eval=eval_magick--------------------------------------------------------
+## ----eval=eval_magick---------------------------------------------------------
 file.name <- 
   system.file("extdata", "Isoquercitin.png", 
               package = "ggpp", mustWork = TRUE)
@@ -195,7 +195,7 @@ ggplot() +
   scale_x_continuous(expand = expansion(mult = 0.2, add = 0)) +
   theme_bw(12)
 
-## ---- eval=eval_magick--------------------------------------------------------
+## ----eval=eval_magick---------------------------------------------------------
 ggplot() +
   annotate("grob", x = 1, y = 3, vp.width = 0.5,
            label = grid::rasterGrob(image = Isoquercitin, width = 1)) +
@@ -238,7 +238,7 @@ ggplot(my.cars, aes(wt, mpg, label = name)) +
   scale_colour_discrete(l = 40) +
   expand_limits(x = 6.5)
 
-## ---- eval=eval_magick--------------------------------------------------------
+## ----eval=eval_magick---------------------------------------------------------
 file.name <- 
   system.file("extdata", "Robinin.png", 
               package = "ggpp", mustWork = TRUE)
@@ -260,7 +260,7 @@ ggplot(data.tb, aes(x, y)) +
   geom_point() +
   expand_limits(y = 55, x = 0)
 
-## ---- eval=eval_magick--------------------------------------------------------
+## ----eval=eval_magick---------------------------------------------------------
 ggplot(data.tb, aes(x, y)) +
   geom_grob_npc(label = list(grid::rasterGrob(image = Robinin, width = 1)), 
                 npcx = 0.02, npcy = 0.95,
@@ -268,7 +268,7 @@ ggplot(data.tb, aes(x, y)) +
   geom_point() +
   expand_limits(y = 55, x = 0)
 
-## ---- eval=eval_magick--------------------------------------------------------
+## ----eval=eval_magick---------------------------------------------------------
 ggplot(data.tb, aes(x, y)) +
   annotate("grob_npc", label = grid::rasterGrob(image = Robinin, width = 1), 
                 npcx = 0.02, npcy = 0.95, vp.width = 1/2, vp.height = 1/4) +
@@ -305,7 +305,7 @@ ggplot(mpg, aes(displ, hwy, colour = factor(cyl))) +
   geom_point(alpha = 0.33) +
   stat_centroid(shape = "cross", size = 4)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  ggplot(mpg, aes(displ, hwy, colour = factor(cyl))) +
 #    geom_point(alpha = 0.33) +
 #    stat_centroid(shape = "cross", size = 4, .fun = median)
@@ -512,7 +512,7 @@ ggplot(data = d, aes(x, y, label = lab, colour = group)) +
                      vjust = "outward", hjust = "outward") +
   scale_x_continuous(expand = expansion(c(0.1, 0.1)))
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  random_string <- function(len = 6) {
 #  paste(sample(letters, len, replace = TRUE), collapse = "")
 #  }
@@ -748,6 +748,22 @@ ggplot(data = df, aes(x1, x2, group = grp)) +
      position = position_fillnudge(vjust = 1, y = -0.05)) +
    theme(legend.position = "none")
 
+
+## -----------------------------------------------------------------------------
+ggplot(birch_dw.df,
+       aes(y = dry.weight * 1e-3, x = Density, fill = Part)) +
+  stat_summary(geom = "col", fun = mean,
+               position = "stack", alpha = 0.7, width = 0.67) +
+  # error bars for each stack bar
+  stat_summary(geom = "linerange", fun.data = mean_cl_normal,
+               position = position_stack_minmax(x = -0.1)) +
+  # error bar for the total
+  stat_summary(data = birch.df, aes(y = (dwstem + dwroot) * 1e-3, fill = NULL),
+               geom = "linerange", linewidth = 0.75,
+               position = position_nudge(x = 0.1), fun.data = mean_cl_normal) +
+  labs(y = "Seedling dry mass (g)") +
+  scale_fill_grey(start = 0.7, end = 0.3) +
+  facet_wrap(facets = vars(Container))
 
 ## -----------------------------------------------------------------------------
  jitter <- position_jitter(width = 0.2, height = 2, seed = 123)

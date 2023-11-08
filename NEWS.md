@@ -6,6 +6,19 @@ editor_options:
     wrap: 72
 ---
 
+# ggpp 0.5.5
+
+-   Update for compatibility with upcoming 'ggplot2' >= 3.5.0.
+-   Support the `angle` aesthetic in `geom_label_npc()`, `geom_label_s()` and 
+`geom_label_pairwise()` matching the upcoming update to `ggplot2::geom_label()` 
+(with help from _teunbrand_).
+-   Add support for `linetype` aesthetic to `geom_label_npc()`, for consistency
+with `geom_label_s()` and `geom_label_pairwise()`.
+-   Add `position_stack_minmax()` to correctly position error bars in stacked plots.
+-   Add data sets `birch.df`and `birch_dw.df` with data for 350 birch seedlings.
+-   Add data set `weather_18_june_2019.df` with data at 1 min intercal for 24 h.
+-   Move transcriptomics data sets `quadrant_example.df` and `volcano_example.df` from 'ggpmisc' to 'ggpp'.
+
 # ggpp 0.5.4
 
 -   Add `geom_text_pairwise()` and `geom_label_pairwise()`suitable for 

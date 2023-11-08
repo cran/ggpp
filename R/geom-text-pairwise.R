@@ -237,9 +237,21 @@
 #'                      y = bar.height, label = text))
 #'
 #' p2 +
+#'   geom_text_pairwise(data = my.ranges,
+#'                      aes(xmin = A, xmax = B,
+#'                          y = bar.height, label = text),
+#'                      angle = 90, hjust = -0.1)
+#'
+#' p2 +
 #'   geom_label_pairwise(data = my.ranges,
 #'                       aes(xmin = A, xmax = B,
-#'                       y = bar.height, label = text))
+#'                           y = bar.height, label = text),
+#'                      angle = 90, hjust = -0.1)
+#'
+#' p2 +
+#'   geom_label_pairwise(data = my.ranges,
+#'                       aes(xmin = A, xmax = B,
+#'                           y = bar.height, label = text))
 #'
 #' p2 +
 #'   geom_text_pairwise(data = my.ranges,
@@ -420,7 +432,7 @@ GeomTextPairwise <-
                                                        ggplot2::alpha(row$colour, segment.alpha),
                                                        ggplot2::alpha(default.colour, segment.alpha)),
                                               lwd = (if (segment.linewidth == 0) 0.5 else segment.linewidth) * ggplot2::.stroke),
-                                            name = paste("text.s.segment", row$group, row.idx, sep = ".")
+                                            name = paste("text.pr.segment", row$group, row.idx, sep = ".")
                          )
                        all.grobs <- grid::gList(all.grobs, segment.grob, user.grob)
 
