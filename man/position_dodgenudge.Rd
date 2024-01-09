@@ -20,9 +20,17 @@ position_dodgenudge(
   kept.origin = c("dodged", "original", "none")
 )
 
-position_dodge_keep(width = 1, preserve = c("total", "single"))
+position_dodge_keep(
+  width = 1,
+  preserve = c("total", "single"),
+  kept.origin = "original"
+)
 
-position_dodge2_keep(width = 1, preserve = c("total", "single"))
+position_dodge2_keep(
+  width = 1,
+  preserve = c("total", "single"),
+  kept.origin = "original"
+)
 
 position_dodge2nudge(
   width = 1,
@@ -134,6 +142,7 @@ ggplot(data = df, aes(x2, x1, group = grp)) +
 Other position adjustments: 
 \code{\link{position_jitternudge}()},
 \code{\link{position_nudge_center}()},
+\code{\link{position_nudge_keep}()},
 \code{\link{position_nudge_line}()},
 \code{\link{position_nudge_to}()},
 \code{\link{position_stacknudge}()}

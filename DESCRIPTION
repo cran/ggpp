@@ -1,8 +1,8 @@
 Package: ggpp
 Type: Package
 Title: Grammar Extensions to 'ggplot2'
-Version: 0.5.5
-Date: 2023-11-07
+Version: 0.5.6
+Date: 2024-01-07
 Authors@R: 
     c(
     person("Pedro J.", "Aphalo", email = "pedro.aphalo@helsinki.fi", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3385-972X")),
@@ -40,11 +40,11 @@ Encoding: UTF-8
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-11-07 23:05:42 UTC; aphalo
+Packaged: 2024-01-07 19:02:09 UTC; aphalo
 Author: Pedro J. Aphalo [aut, cre] (<https://orcid.org/0000-0003-3385-972X>),
   Kamil Slowikowski [ctb] (<https://orcid.org/0000-0002-2843-6370>),
   Michał Krassowski [ctb] (<https://orcid.org/0000-0002-9638-7785>),
   Daniel Sabanés Bové [ctb],
   Stella Banjo [ctb]
 Repository: CRAN
-Date/Publication: 2023-11-08 00:50:02 UTC
+Date/Publication: 2024-01-09 07:00:02 UTC

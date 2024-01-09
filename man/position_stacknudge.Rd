@@ -29,9 +29,9 @@ position_fillnudge(
   kept.origin = c("stacked", "original", "none")
 )
 
-position_stack_keep(vjust = 1, reverse = FALSE)
+position_stack_keep(vjust = 1, reverse = FALSE, kept.origin = "original")
 
-position_fill_keep(vjust = 1, reverse = FALSE)
+position_fill_keep(vjust = 1, reverse = FALSE, kept.origin = "original")
 
 position_stack_minmax(
   vjust = 1,
@@ -180,6 +180,7 @@ Other position adjustments:
 \code{\link{position_dodgenudge}()},
 \code{\link{position_jitternudge}()},
 \code{\link{position_nudge_center}()},
+\code{\link{position_nudge_keep}()},
 \code{\link{position_nudge_line}()},
 \code{\link{position_nudge_to}()}
 }

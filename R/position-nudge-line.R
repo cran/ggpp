@@ -15,8 +15,7 @@
 #' @family position adjustments
 #'
 #' @param x,y Amount of vertical and horizontal distance to move. A numeric
-#'   vector of length 1, or of the same length as rows there are in \code{data},
-#'   with nudge values in data rows order.
+#'   vector of length 1 or longer.
 #' @param xy_relative Nudge relative to \emph{x} and \emph{y} data expanse, ignored unless
 #'   \code{x} and \code{y} are both \code{NA}s.
 #' @param abline a vector of length two giving the intercept and slope.
@@ -237,6 +236,8 @@ PositionNudgeLine <-
     setup_params = function(self, data) {
       list(x = self$x,
            y = self$y,
+           x.reorder = !is.null(self$x) && length(self$x) > 1 && length(self$x) < nrow(data),
+           y.reorder = !is.null(self$y) && length(self$y) > 1 && length(self$y) < nrow(data),
            xy_relative = self$xy_relative,
            abline = self$abline,
            method = self$method,
@@ -248,6 +249,13 @@ PositionNudgeLine <-
     },
 
     compute_panel = function(data, params, scales) {
+
+      if (length(params$x) > nrow(data)) {
+        warning("Argument 'x' longer than data: some values dropped!")
+      }
+      if (length(params$y) > nrow(data)) {
+        warning("Argument 'y' longer than data: some values dropped!")
+      }
       x_orig <- data$x
       y_orig <- data$y
       # set parameter defaults that depend on the scale
@@ -257,7 +265,7 @@ PositionNudgeLine <-
       y_spread <- y_range[2] - y_range[1]
       xy.range.ratio <- x_spread / y_spread
 
-      if (all(is.na(params$x)) & all(is.na(params$y))) {
+      if (all(is.na(params$x) & is.na(params$y))) {
         params$x <- params$xy_relative[1] * x_spread
         params$y <- params$xy_relative[2] * y_spread
       } else if (xor(all(is.na(params$x)), all(is.na(params$y)))) {
@@ -314,8 +322,21 @@ PositionNudgeLine <-
       angle.rotation <- ifelse(sm.deriv > 0, -0.5 * pi, +0.5 * pi)
       # scaling is needed to compute the angle on the plot
       angle <- atan2(sm.deriv * xy.range.ratio, 1) + angle.rotation
-      x_nudge <- params$x * cos(angle) * ifelse(sm.deriv > 0, -1, +1)
-      y_nudge <- params$y * sin(angle) * ifelse(sm.deriv > 0, -1, +1)
+
+      if (params$x.reorder) {
+        x_nudge <- rep_len(params$x, nrow(data))[order(order(data$x))] *
+          cos(angle) * ifelse(sm.deriv > 0, -1, +1)
+      } else {
+        x_nudge <- rep_len(params$x, nrow(data)) *
+          cos(angle) * ifelse(sm.deriv > 0, -1, +1)
+      }
+      if (params$y.reorder) {
+        y_nudge <- rep_len(params$y, nrow(data))[order(order(data$y))] *
+          sin(angle) * ifelse(sm.deriv > 0, -1, +1)
+      } else {
+        y_nudge <- rep_len(params$y, nrow(data)) *
+          sin(angle) * ifelse(sm.deriv > 0, -1, +1)
+      }
 
       if (params$direction == "split") {
         # sign depends on position relative to the line or curve
@@ -339,13 +360,13 @@ PositionNudgeLine <-
                           x_nudge)
       }
       # transform only the dimensions for which new coordinates exist
-      if (any(params$x != 0)) {
-        if (any(params$y != 0)) {
+      if (any(x_nudge != 0)) {
+        if (any(y_nudge != 0)) {
           data <- ggplot2::transform_position(data, function(x) x + x_nudge, function(y) y + y_nudge)
         } else {
           data <- ggplot2::transform_position(data, function(x) x + x_nudge, NULL)
         }
-      } else if (any(params$y != 0)) {
+      } else if (any(y_nudge != 0)) {
         data <- ggplot2::transform_position(data, NULL, function(y) y + y_nudge)
       }
       if (params$kept.origin == "original") {
