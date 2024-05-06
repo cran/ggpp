@@ -6,6 +6,46 @@ editor_options:
     wrap: 72
 ---
 
+# ggpp 0.5.7
+
+Track changes in 'ggplot2' 3.5.0 and 3,5,1. Fix a couple of minor
+incompatibilities. Add some new features matching those new in 'ggplot2'.
+General improvements and bug fixes.
+
+-   This version depends on 'ggplot2' >= 3.5.0.
+-   Add helper function `wrap_labels()`, useful to insert new lines into
+characters strings stored in a vector.
+-   Add `as_npc()`, `as_npcx()` and `as_npcy()` helper functions that translate
+positions given as character strings into numeric values in [0..1] corresponding
+to NPC (Normalised Parent Coordinates) and validate the range of numeric values
+if passed directly as arguments. The returned values belong to class `AsIs` and
+ready to use in aesthetic mappings.
+-   Update `geom_point_s()` adding parameter `move.point` to allow its use to 
+highlight points at the original position with an arrow with its start given by 
+the displacement by a position function.
+-   Change in `geom_point_s()` the end at which the tip of the arrow is drawn,
+to its most frequently used direction, even if opposite to the default for
+`geom_text_s()` and `geom_label_s()`.
+-   Update `geom_text_s()`, `geom_label_s()`. `geom_text_pairwise()` and 
+`geom_label_pairwise()` adding parameter `size.unit` tracking change in 
+`geom_text()` and `geom_label()` in 'ggplot2' >= 3.5.0.
+-   Update `geom_text_s()`, `geom_label_s()`. `geom_text_pairwise()` and 
+`geom_label_pairwise()` so that graphic elements in the keys match those in
+the plot, even when using the additional features available in 'ggplot2' in
+>= 3.5.0.
+-   Update `geom_text_s()`, `geom_label_s()`. `geom_text_pairwise()` and 
+`geom_label_pairwise()` so that they respect the `alpha` component of
+color defintions.
+-   Update `stat_fmt_table()` to allow application of functions to columns.
+-   Fix in `geom_text_s()`, `geom_label_s()`. `geom_text_pairwise()` and 
+`geom_label_pairwise()` an infrequent problem with incomplete guides in 
+'ggplot2' >= 3.5.0.
+-   Fix bug in `geom_point_s()`, `alpha_target = "point"` ignored.
+-   Fix bug in `geom_label_s()`, `colour_target = "box.line"` ignored.
+-   Fix bug in in `shrink_segments()` giving a spureous error with totel 
+shrinkage > 1 mm. Affecting all geometries with formal parameters `box.padding` 
+and `point.padding`.
+
 # ggpp 0.5.6
 
 -   Fix bug in `stat_density2d_filter()`.

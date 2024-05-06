@@ -1,4 +1,5 @@
 #' @rdname geom_text_pairwise
+#' @include ggp2-margins.R utilities.R ggpp-legend-draw.R
 #'
 #' @param label.padding Amount of padding around label. Defaults to 0.25 lines.
 #' @param label.r Radius of rounded corners. Defaults to 0.15 lines.
@@ -18,12 +19,13 @@ geom_label_pairwise <-
            default.color = default.colour,
            colour.target = "all",
            color.target = colour.target,
-           default.alpha = 1,
+           default.alpha = NA,
            alpha.target = "segment",
            label.padding = grid::unit(0.25, "lines"),
            label.r = grid::unit(0.15, "lines"),
            segment.linewidth = 0.5,
            arrow = NULL,
+           size.unit = "mm",
            na.rm = FALSE,
            show.legend = FALSE,
            inherit.aes = FALSE) {
@@ -65,6 +67,7 @@ geom_label_pairwise <-
       label.r = label.r,
       segment.linewidth = segment.linewidth,
       arrow = arrow,
+      size.unit = size.unit,
       na.rm = na.rm,
       ...
     )
@@ -89,7 +92,7 @@ GeomLabelPairwise <-
                      linetype = "solid",
                      hjust = 0.5,
                      vjust = 0.5,
-                     alpha = 1,
+                     alpha = NA,
                      family = "",
                      fontface = 1,
                      lineheight = 1.2
@@ -98,9 +101,10 @@ GeomLabelPairwise <-
                    draw_panel = function(data, panel_params, coord, #panel_scales,
                                          parse = FALSE,
                                          na.rm = FALSE,
+                                         size.unit = "mm",
                                          default.colour = "black",
                                          colour.target = "all",
-                                         default.alpha = 1,
+                                         default.alpha = NA,
                                          alpha.target = "fill",
                                          segment.linewidth = 0.5,
                                          arrow = NULL,
@@ -142,6 +146,9 @@ GeomLabelPairwise <-
                                         just = data$hjust,
                                         a = "x", b = "y")
                      }
+
+                     size.unit <- resolve_text_unit(size.unit)
+
                      if (!inherits(label.padding, "margin")) {
                        label.padding <- rep(label.padding, length.out = 4)
                      }
@@ -177,7 +184,7 @@ GeomLabelPairwise <-
                                                 col = ifelse(any(colour.target %in% c("all", "text")),
                                                              ggplot2::alpha(row$colour, text.alpha),
                                                              ggplot2::alpha(default.colour, text.alpha)),
-                                                fontsize = row$size * .pt,
+                                                fontsize = row$size * size.unit,
                                                 fontfamily = row$family,
                                                 fontface = row$fontface,
                                                 lineheight = row$lineheight
@@ -227,5 +234,5 @@ GeomLabelPairwise <-
 
                    },
 
-                   draw_key = draw_key_text
+                   draw_key = draw_key_label_s
   )

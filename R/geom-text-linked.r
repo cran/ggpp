@@ -1,15 +1,10 @@
 #' @title Linked Text
+#' @include ggp2-margins.R utilities.R ggpp-legend-draw.R
 #'
 #' @description Linked text geometries are most useful for adding data labels to
 #'   plots. `geom_text_s()` and `geom_label_s()` add text to the plot and for
 #'   nudged positions link the original location to the nudged text with a
 #'   segment or arrow.
-#'
-#' @section Under development!: These two geometries are still under development
-#'   and their user interface subject to change. In 'ggpp' (== 0.5.0) support
-#'   for aesthetics related to segments was removed, and replaced with
-#'   parameters and a new mechanism for targeting a the usual aesthetics to
-#'   text, border, and segment was added.
 #'
 #' @details Geometries \code{geom_text_s()} and \code{geom_label_s()} have an
 #'   interface similar to that of \code{\link[ggplot2]{geom_text}} and
@@ -22,7 +17,16 @@
 #'   elements the mappings to colour and alpha aesthetics are applied.
 #'   Differently to \code{geom_label()}, \code{geom_label_s()} obeys aesthetic
 #'   mappings to \code{linewidth} and \code{linetype} applied to the line at the
-#'   edge of the label box.
+#'   edge of the label box. These features are reflected in the plot key, except
+#'   for the segment, assumed not to be used to display information
+#'   only in coordination with other graphic elements.
+#'
+#'   In \code{geom_label_s()} the default \code{fill} is similar to
+#'   \code{"white"} but with its \code{alpha} component set to 0.75. This
+#'   differs from \code{"white"} used in \code{geom_label()}: the default fill
+#'   is semitransparent with the intention that accidental occlusion of
+#'   observations is obvious irrespective of the order in which layers are added
+#'   to the plot.
 #'
 #'   Layer functions \code{geom_text_s()} and \code{geom_label_s()} use by
 #'   default \code{\link{position_nudge_keep}} which is backwards compatible
@@ -38,7 +42,7 @@
 #'   choice of which elements are targeted by the aesthetics and which are
 #'   rendered in a default colour. In the grammar of graphics using the same
 #'   aesthetic with multiple meanings is not allowed, thus, the approach used in
-#'   our geoms attempts to enforce this.
+#'   the geometry layer functions from package 'ggpp' attempts to enforce this.
 #'
 #' @section Plot boundaries and clipping: Note that when you change the scale
 #'   limits for \emph{x} and/or \emph{y} of a plot, text labels stay the same
@@ -71,6 +75,13 @@
 #'   ones from package 'ggplot2' with a default justification of \code{0.5} and
 #'   no segment drawn.
 #'
+#' @section Differences from earlier versions:
+#'   The user interface is for the most part stable starting from 'ggpp' (==
+#'   0.5.7). In 'ggpp' (== 0.5.0) support for aesthetics related to segments was
+#'   removed, and replaced by parameters and a new mechanism for targeting the
+#'   usual \code{colour} and \code{alpha} aesthetics to text, border, and
+#'   segment.
+#'
 #' @param mapping Set of aesthetic mappings created by
 #'   \code{\link[ggplot2]{aes}}. If specified and with \code{inherit.aes = TRUE}
 #'   (the default), it is combined with the default mapping at the top level of
@@ -97,6 +108,9 @@
 #'   same layer will not be plotted. \code{check_overlap} takes place at draw
 #'   time and in the order of the data, thus its action depends of the size at
 #'   which the plot is drawn.
+#' @param size.unit How the `size` aesthetic is interpreted: as millimetres
+#'   (`"mm"`, default), points (`"pt"`), centimetres (`"cm"`), inches (`"in"`),
+#'   or picas (`"pc"`).
 #' @param ... other arguments passed on to \code{\link[ggplot2]{layer}}. There
 #'   are three types of arguments you can use here:
 #'
@@ -107,8 +121,8 @@
 #' @param nudge_x,nudge_y Horizontal and vertical adjustments to nudge the
 #'   starting position of each text label. The units for \code{nudge_x} and
 #'   \code{nudge_y} are the same as for the data units on the x-axis and y-axis.
-#' @param default.colour,default.color A colour definition to use for elements not targeted by
-#'   the colour aesthetic.
+#' @param default.colour,default.color A colour definition to use for elements
+#'   not targeted by the colour aesthetic.
 #' @param colour.target,color.target A vector of character strings; \code{"all"},
 #'   \code{"text"}, \code{"segment"}, \code{"box"}, \code{"box.line"}, and
 #'   \code{"box.fill"} or \code{"none"}.
@@ -170,10 +184,17 @@
 #'
 #' my.cars <- mtcars[c(TRUE, FALSE, FALSE, FALSE), ]
 #' my.cars$name <- rownames(my.cars)
-#' p <- ggplot(my.cars, aes(wt, mpg, label = name)) +
-#'        geom_point(color = "red")
 #'
-#' # Use nudging
+#' # no nudging
+#' ggplot(my.cars, aes(wt, mpg, label = name)) +
+#'   geom_text_s() +
+#'   expand_limits(x = c(2, 6))
+#'
+#' # base plot
+#' p <- ggplot(my.cars, aes(wt, mpg, label = name)) +
+#'        geom_point()
+#'
+#' # Using nudging
 #' p +
 #'   geom_text_s(nudge_x = 0.12) +
 #'   expand_limits(x = 6.2)
@@ -182,15 +203,8 @@
 #'   expand_limits(x = 1.5)
 #' p +
 #'   geom_text_s(nudge_x = 0.12,
-#'               arrow = arrow(length = grid::unit(1.5, "mm"))) +
-#'   expand_limits(x = 6.2)
-#' p +
-#'   geom_text_s(nudge_x = 0.12,
 #'               arrow = arrow(length = grid::unit(1.5, "mm")),
 #'               point.padding = 0.4) +
-#'   expand_limits(x = 6.2)
-#' p +
-#'   geom_text_s(hjust = "left", nudge_x = 0.12) +
 #'   expand_limits(x = 6.2)
 #' p +
 #'   geom_text_s(nudge_y = 0.1, nudge_x = 0.07) +
@@ -204,7 +218,8 @@
 #'               colour.target = "segment", colour = "red") +
 #'   expand_limits(y = 30)
 #' p +
-#'   geom_text_s(angle = 90, nudge_y = 1,
+#'   geom_text_s(aes(colour = factor(cyl)),
+#'               angle = 90, nudge_y = 1,
 #'               arrow = arrow(length = grid::unit(1.5, "mm")),
 #'               alpha.target = "segment", alpha = 0.3) +
 #'   expand_limits(y = 30)
@@ -213,13 +228,22 @@
 #'   geom_label_s(nudge_x = 0.12) +
 #'   expand_limits(x = 6.2)
 #' p +
-#'   geom_label_s(nudge_x = 0.12, linetype = "dotted", linewidth = 0.4) +
+#'   geom_label_s(nudge_x = 0.12, linetype = "dotted", linewidth = 0.3) +
 #'   expand_limits(x = 6.2)
 #' p +
-#'   geom_label_s(nudge_x = 0.12, linewidth = 0.5, label.r = unit(0, "lines")) +
+#'   geom_label_s(aes(colour = factor(cyl)),
+#'                nudge_x = 0.12,
+#'                colour.target = "box",
+#'                linewidth = 0.5,
+#'                label.r = unit(0, "lines")) +
 #'   expand_limits(x = 6.2)
 #' p +
 #'   geom_label_s(nudge_x = 0.12, linewidth = 0) +
+#'   expand_limits(x = 6.2)
+#'
+#' # No segments
+#' p +
+#'   geom_label_s(nudge_x = 0.05, segment.linewidth = 0) +
 #'   expand_limits(x = 6.2)
 #'
 #' # Nudging away from arbitrary point
@@ -241,26 +265,24 @@
 #'               arrow = arrow(angle = 20,
 #'                             length = grid::unit(1.5, "mm"),
 #'                             ends = "first",
-#'                             type = "closed"),
-#'               show.legend = FALSE) +
+#'                             type = "closed")) +
 #'   scale_colour_discrete(l = 40) + # luminance, make colours darker
 #'   expand_limits(y = 27)
 #'
 #' p +
 #'   geom_text_s(aes(colour = factor(cyl)),
-#'               colour.target = "text",
 #'               angle = 90,
 #'               nudge_y = 1,
 #'               arrow = arrow(angle = 20,
 #'                             length = grid::unit(1.5, "mm"),
 #'                             ends = "first",
-#'                             type = "closed"),
-#'               show.legend = FALSE) +
+#'                             type = "closed")) +
 #'   scale_colour_discrete(l = 40) + # luminance, make colours darker
 #'   expand_limits(y = 27)
 #'
 #' p +
 #'   geom_label_s(aes(colour = factor(cyl)),
+#'               colour.target = c("box", "text"),
 #'               nudge_x = 0.3,
 #'               arrow = arrow(angle = 20,
 #'                             length = grid::unit(1/3, "lines"))) +
@@ -271,7 +293,7 @@
 #'   geom_label_s(aes(colour = factor(cyl)),
 #'               nudge_x = 0.3,
 #'               colour.target = c("box", "segment"),
-#'               linewidth = 0.6,
+#'               linewidth = 0.5,
 #'               arrow = arrow(angle = 20,
 #'                             length = grid::unit(1/3, "lines"))) +
 #'   scale_colour_discrete(l = 40) + # luminance, make colours darker
@@ -305,7 +327,7 @@ geom_text_s <- function(mapping = NULL,
                         default.color = default.colour,
                         colour.target = "text",
                         color.target = colour.target,
-                        default.alpha = 1,
+                        default.alpha = NA,
                         alpha.target = "all",
                         add.segments = TRUE,
                         box.padding = 0.25,
@@ -314,6 +336,7 @@ geom_text_s <- function(mapping = NULL,
                         min.segment.length = 0,
                         arrow = NULL,
                         check_overlap = FALSE,
+                        size.unit = "mm",
                         na.rm = FALSE,
                         show.legend = NA,
                         inherit.aes = TRUE) {
@@ -358,6 +381,7 @@ geom_text_s <- function(mapping = NULL,
       min.segment.length = min.segment.length,
       arrow = arrow,
       check_overlap = check_overlap,
+      size.unit = size.unit,
       na.rm = na.rm,
       ...
     )
@@ -372,13 +396,15 @@ GeomTextS <-
   ggplot2::ggproto("GeomTextS", ggplot2::Geom,
                    required_aes = c("x", "y", "label"),
 
+                   non_missing_aes = "angle",
+
                    default_aes = ggplot2::aes(
                      colour = "black",
                      size = 3.88,
                      angle = 0,
                      hjust = "position",
                      vjust = "position",
-                     alpha = 1,
+                     alpha = NA,
                      family = "",
                      fontface = 1,
                      lineheight = 1.2
@@ -388,9 +414,10 @@ GeomTextS <-
                                          panel_params,
                                          coord, #panel_scales,
                                          parse = FALSE,
+                                         size.unit = "mm",
                                          default.colour = "black",
                                          colour.target = "all",
-                                         default.alpha = 1,
+                                         default.alpha = NA,
                                          alpha.target = "all",
                                          na.rm = FALSE,
                                          check_overlap = FALSE,
@@ -415,6 +442,7 @@ GeomTextS <-
                      }
 
                      data <- coord$transform(data, panel_params)
+
                      if (all(c("x_orig", "y_orig") %in% colnames(data))) {
                        data_orig <- data.frame(x = data$x_orig, y = data$y_orig)
                        data_orig <- coord$transform(data_orig, panel_params)
@@ -438,6 +466,8 @@ GeomTextS <-
                                         just = data$hjust,
                                         a = "x", b = "y")
                      }
+
+                     size.unit <- resolve_text_unit(size.unit)
 
                      if (add.segments) {
                        segments.data <-
@@ -466,7 +496,7 @@ GeomTextS <-
                            col = ifelse(any(colour.target %in% c("all", "text")),
                                         ggplot2::alpha(row$colour, text.alpha),
                                         ggplot2::alpha(default.colour, text.alpha)),
-                           fontsize = row$size * .pt,
+                           fontsize = row$size * size.unit,
                            fontfamily = row$family,
                            fontface = row$fontface,
                            lineheight = row$lineheight
@@ -508,7 +538,7 @@ GeomTextS <-
 
                    },
 
-                   draw_key = draw_key_text
+                   draw_key = draw_key_text_s
   )
 
 # heavily modified from geom-text.r from 'ggplot2' 3.1.0
@@ -519,7 +549,7 @@ GeomTextS <-
 # arbitrary positions along the axis.
 #
 # We support "position" (could be called "away") when nudging or other
-# displacement has been applied and the original postion saved.
+# displacement has been applied and the original position saved.
 #
 # This function can handle either hjust or vjust, but only one at a time.
 compute_just2d <- function(data,
@@ -558,7 +588,9 @@ compute_just2d <- function(data,
         just[position] <- "middle"
       } else {
         just[position] <-
-          c("left", "middle", "right")[2L + 1L * sign(data[[ab_orig[1L]]][position] - data[[ab[1L]]][position])]
+          c("left", "middle", "right")[2L + 1L *
+                                         sign(data[[ab_orig[1L]]][position] -
+                                                data[[ab[1L]]][position])]
       }
     }
 
@@ -651,14 +683,14 @@ compute_just <- function(just, a, b = a, angle = 0) {
 # shorten segments to add padding
 # code based on https://stackoverflow.com/questions/22649781/
 #
+# box.padding and point.pading givern in mm
+#
 shrink_segments <- function(data,
                             box.padding = 0,
                             point.padding = 0,
                             min.segment.length = 0.5) {
   stopifnot("'box.padding' must be >= 0" = box.padding >= 0,
-            "'point.padding' must be >= 0" =  point.padding >= 0,
-            "'box.padding + point.padding' must be < 1" =
-              (box.padding + point.padding) < 1)
+            "'point.padding' must be >= 0" =  point.padding >= 0)
   segments.data <- data[ , c("x_orig", "y_orig", "x", "y")]
   starting.length <- apply(segments.data, 1,
                            function(x) stats::dist(rbind(x[1:2], x[3:4])))
@@ -708,4 +740,3 @@ ggname <- function(prefix, grob) {
   grob$name <- grobName(grob, prefix)
   grob
 }
-

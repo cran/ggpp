@@ -18,12 +18,13 @@ geom_label_pairwise(
   default.color = default.colour,
   colour.target = "all",
   color.target = colour.target,
-  default.alpha = 1,
+  default.alpha = NA,
   alpha.target = "segment",
   label.padding = grid::unit(0.25, "lines"),
   label.r = grid::unit(0.15, "lines"),
   segment.linewidth = 0.5,
   arrow = NULL,
+  size.unit = "mm",
   na.rm = FALSE,
   show.legend = FALSE,
   inherit.aes = FALSE
@@ -42,11 +43,12 @@ geom_text_pairwise(
   default.color = default.colour,
   colour.target = "all",
   color.target = colour.target,
-  default.alpha = 1,
+  default.alpha = NA,
   alpha.target = "all",
   segment.linewidth = 0.5,
   arrow = NULL,
   check_overlap = FALSE,
+  size.unit = "mm",
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = FALSE
@@ -105,6 +107,10 @@ elements not targeted by the alpha aesthetic.}
 
 \item{arrow}{specification for arrow heads, as created by
 \code{\link[grid]{arrow}}}
+
+\item{size.unit}{How the `size` aesthetic is interpreted: as millimetres
+(`"mm"`, default), points (`"pt"`), centimetres (`"cm"`), inches (`"in"`),
+or picas (`"pc"`).}
 
 \item{na.rm}{If \code{FALSE} (the default), removes missing values with a
 warning.  If \code{TRUE} silently removes missing values.}

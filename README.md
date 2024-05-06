@@ -1,6 +1,4 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # ggpp <img src="man/figures/logo-ggpp.png" align="right" width="150"/>
 
 <!-- badges: start -->
@@ -9,22 +7,36 @@
 version](https://www.r-pkg.org/badges/version/ggpp)](https://cran.r-project.org/package=ggpp)
 [![cran
 checks](https://badges.cranchecks.info/worst/ggpp.svg)](https://cran.r-project.org/web/checks/check_results_ggpp.html)
+[![ggpp status
+badge](https://aphalo.r-universe.dev/badges/ggpp)](https://aphalo.r-universe.dev/ggpp)
 [![R-CMD-check](https://github.com/aphalo/ggpp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aphalo/ggpp/actions/workflows/R-CMD-check.yaml)
 [![Coverage](https://raw.githubusercontent.com/aphalo/ggpp/_xml_coverage_reports/data/master/badge.svg)](https://raw.githubusercontent.com/aphalo/ggpp/_xml_coverage_reports/data/master/coverage.xml)
+<a href="https://docs.r4photobiology.info/ggpp/"><img src="https://img.shields.io/badge/documentation-ggpp-informational.svg" alt="" /></a>
 <!-- badges: end -->
 
 ## Purpose
 
 Package ‘**ggpp**’ provides a set of building blocks that extend the
-Grammar of Graphics implemented in package ‘ggplot2’ (\>= 3.0.0). The
+Grammar of Graphics implemented in package ‘ggplot2’ (\>= 3.5.0). The
 extensions enhance the support of data labels and annotations in plots.
-New geometries support insets in plots, data labels, marginal marks and
-the use of native plot coordinates (npc). Position functions implement
-new approaches to nudging usable with any geometry, but especially
-useful together with `geom_text_s()` and `geom_label_s()` from this
-package and `geom_text_repel()` and `geom_label_repel()` from package
-‘ggrepel’ (\>= 0.9.2). See: (<https://ggrepel.slowkow.com>) for
-installation instructions and news about releases.
+Position functions implement new approaches to nudging usable with any
+geometry, but especially useful together with `geom_text_s()` and
+`geom_label_s()` from this package and `geom_text_repel()` and
+`geom_label_repel()` from package ‘ggrepel’ (\>= 0.9.2). See:
+(<https://ggrepel.slowkow.com>) for installation instructions and news
+about releases.
+
+## NPC support in ggplot2
+
+**Normalised Parent Coordinates (NPC) are supported natively by
+‘ggplot2’ \>= 3.5.0 by means of R’s identity function `I()`. This new
+approach does not require special geometries as it should work with
+almost every existing geometry. However, currently this works only when
+continuous variables are mapped to the *x* and/or *y* aesthetics. If
+this mechanism is extended to support factors and other discrete
+variables in the future , all the `_npc` geometries from ‘ggpp’ could
+become redundant. Meanwhile, these special geometries from ‘ggpp’ still
+fill a gap, albeit a smaller one, in the support of NPC by ‘ggplot2’.**
 
 ## Extended Grammar of graphics
 
@@ -32,38 +44,38 @@ installation instructions and news about releases.
 
 The distinction between observations or data mapped to *x* and *y*
 aesthetics and data labels is that data labels are linked to a the
-coordinates of the data, but own location is usually nearby but not
-exactly that of the data. In other words the location of a data label in
-*x* and *y* coordinates is flexible as long as the link to a data
-observation can be inferred. In the case of annotations the location on
-the plotting area is arbitrary, dictated by available graphic design
-considerations and the requirement of not occluding data observations.
-In the table below we list the geometries defined in package ‘ggpp’,
-whether they are intended to for data labels, annotations or data, the
-aesthetics and pseudo-aesthetic they obey and whether the can connect
-the original data position to the displaced position where the data
-label is anchored. These requires also a change in the behaviour of
-position functions, that we will describe in the next section.
+coordinates of the data, but their own location is usually nearby but
+not exactly that of the data. In other words the location of a data
+label in *x* and *y* coordinates is flexible as long as the link to a
+data observation can be inferred. In the case of annotations the
+location on the plotting area is arbitrary, dictated by available
+graphic design considerations and the requirement of not occluding data
+observations. In the table below we list for the geometries defined in
+package ‘ggpp’: 1) whether they are intended for data labels,
+annotations or data, 2) the aesthetics and pseudo-aesthetics they obey,
+and 3) whether they can connect the original data position to the
+displaced position. The drawing of connecting segments or arrows between
+the displaced and original positions, those of the observation and the
+displaced label, requires also a change in the data returned by position
+functions (see the next section).
 
-| Geometry                                   | Main use                        | Aesthetics                                                                                                      | Segment |
-|--------------------------------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------|---------|
-| `geom_text_s()`                            | data labels                     | x, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                                 | yes     |
-| `geom_label_s()`                           | data labels                     | x, y, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust             | yes     |
-| `geom_text_pairwise()`                     | data labels                     | x, xmin, xmax, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                     | horiz.  |
-| `geom_label_pairwise()`                    | data labels                     | x, xmin, xmax, y, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust | horiz.  |
-| `geom_text_npc()`                          | annotations                     | npcx, npcy, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                           | no      |
-| `geom_label_npc()`                         | annotations                     | npcx, npcy, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust       | no      |
-| `geom_point_s()`                           | data labels                     | x, y, size, colour, fill, alpha, shape, stroke, group                                                           | yes     |
-| `geom_table()`                             | data labels                     | x, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                                 | yes     |
-| `geom_table_npc()`                         | annotations                     | npcx, npcy, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                           | no      |
-| `geom_plot()` , `geom_grob()`              | data labels                     | x, y, label, group, angle, vjust, hjust                                                                         | yes     |
-| `geom_plot_npc()` , `geom_grob_npc()`      | annotations                     | npcx, npcy, label, group, vjust, hjust                                                                          | no      |
-| `geom_margin_arrow()`                      | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
-| `geom_margin_point()`                      | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
-| `geom_margin_grob()`                       | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
-| `geom_quadrant_lines()` , `geom_vhlines()` | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
+| Geometry                                             | Main use                        | Aesthetics                                                                                                      | Segment |
+|------------------------------------------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------|---------|
+| `geom_text_s()`                                      | data labels                     | x, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                                 | yes     |
+| `geom_label_s()`                                     | data labels                     | x, y, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust             | yes     |
+| `geom_text_pairwise()`                               | data labels                     | x, xmin, xmax, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                     | horiz.  |
+| `geom_label_pairwise()`                              | data labels                     | x, xmin, xmax, y, label, size, family, font face, colour, fill, alpha, linewidth, linetype, group, vjust, hjust | horiz.  |
+| `geom_point_s()`                                     | data labels                     | x, y, size, colour, fill, alpha, shape, stroke, group                                                           | yes     |
+| `geom_table()`<sup>1</sup>                           | data labels                     | x, y, label, size, family, font face, colour, alpha, group, angle, vjust, hjust                                 | yes     |
+| `geom_plot()`<sup>1</sup>, `geom_grob()`<sup>1</sup> | data labels                     | x, y, label, group, angle, vjust, hjust                                                                         | yes     |
+| `geom_margin_arrow()`                                | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
+| `geom_margin_point()`                                | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
+| `geom_margin_grob()`                                 | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
+| `geom_quadrant_lines()` , `geom_vhlines()`           | data labels, scale labels, data | xintercept, yintercept, label, size, family, font face, colour, alpha, group, vjust, hjust                      | no      |
 
-Geometries defined in package ‘ggpp’
+Geometries defined in package ‘ggpp’. <sup>1</sup> NPC versions exist
+for these geometries, as well as for `geom_text()` and `geom_label()`,
+used mainly for plot annotations.
 
 ## Position functions
 
@@ -92,7 +104,7 @@ the the observations.
 
 Position functions `position_stacknudge()`, `position_fillnudge()`,
 `position_jitternudge()`, `position_dodgenudge()` and
-`position_dodge2nudge()` each combines the roles of two *position*
+`position_dodge2nudge()` combine each the roles of two *position*
 functions. They make it possible to easily nudge labels in plot layers
 that use stacking, dodging or jitter. Functions
 `position_jitter_keep()`, `position_stack_keep()`,
@@ -118,19 +130,7 @@ keep in the `data` object the original coordinates.
 | `position_dodgenudge()`   | dodge + nudge  | combined, see above             | data labels in column plots |
 | `position_dodge2nudge()`  | dodge2 + nudge | combined, see above             | data labels in box plots    |
 
-Position functions defined in package ‘ggpp’
-
-### Aesthetics and scales
-
-Scales `scale_npcx_continuous()` and `scale_npcy_continuous()` and the
-corresponding new aesthetics `npcx` and `npcy` make it possible to add
-graphic elements and text as nnotations to plots using coordinates
-expressed in `npc` units for the location within the plotting area. The
-difference to using function `annotate()` is that while annotate is
-driven only by constant values and does not support facets, the geoms
-that use these pseudo-aesthetics do, opening the door to the easy
-addition of a whole range of new annotations within the grammar of
-graphics.
+Position functions defined in package ‘ggpp’.
 
 ### Statistics
 
@@ -235,9 +235,8 @@ ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
 
 A plot with an inset plot.
 
-Inset plot positioned using native plot coordinates (npc) and using
-keywords insted of numerical values in the range 0..1 which are also
-accepted.
+Inset plot positioned using native plot coordinates (npc) using
+numerical values in the range 0..1 together with `I()`.
 
 ``` r
 p <- ggplot(mtcars, aes(factor(cyl), mpg, colour = factor(cyl))) +
@@ -247,7 +246,8 @@ p <- ggplot(mtcars, aes(factor(cyl), mpg, colour = factor(cyl))) +
 
 ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
   geom_point(show.legend = FALSE) +
-  annotate("plot_npc", npcx = "left", npcy = "bottom", label = p) +
+  annotate("plot", x = I(0.05), y = I(0.05), label = p, 
+           hjust = "inward", vjust = "inward") +
   expand_limits(y = 0, x = 0)
 ```
 
@@ -300,13 +300,24 @@ ggplot(data = df, aes(x2, x1, group = grp)) +
 
 ## Installation
 
-Installation of the most recent stable version from CRAN:
+Installation of the most recent stable version from CRAN (sources, Mac
+and Win binaries):
 
 ``` r
 install.packages("ggpp")
 ```
 
-Installation of the current unstable version from GitHub:
+Installation of the current unstable version from R-Universe CRAN-like
+repository (binaries for Mac, Win, Webassembly, and Linux, as well as
+sources available):
+
+``` r
+install.packages('ggpp', 
+                 repos = c('https://aphalo.r-universe.dev', 
+                           'https://cloud.r-project.org'))
+```
+
+Installation of the current unstable version from GitHub (from sources):
 
 ``` r
 # install.packages("devtools")
@@ -359,8 +370,12 @@ reciprocal contributions by Kamil Slowikowski to ‘ggpp’ and by myself to
 
 ## References
 
-Aphalo, Pedro J. (2020) *Learn R: As a Language.* The R Series. Boca
-Raton and London: Chapman and Hall/CRC Press. ISBN: 978-0-367-18253-3.
+Aphalo, Pedro J. (2024) *Learn R: As a Language.* 2ed. The R Series.
+Boca Raton and London: Chapman and Hall/CRC Press. ISBN: 9781032516998.
+466 pp.
+
+Aphalo, Pedro J. (2020) *Learn R: As a Language.* 1ed. The R Series.
+Boca Raton and London: Chapman and Hall/CRC Press. ISBN: 9780367182533.
 350 pp.
 
 Wickham, Hadley. 2010. “A Layered Grammar of Graphics.” Journal of
@@ -369,6 +384,6 @@ Computational and Graphical Statistics 19 (1): 3–28.
 
 ## License
 
-© 2016-2023 Pedro J. Aphalo (<pedro.aphalo@helsinki.fi>). Released under
+© 2016-2024 Pedro J. Aphalo (<pedro.aphalo@helsinki.fi>). Released under
 the GPL, version 2 or greater. This software carries no warranty of any
 kind.

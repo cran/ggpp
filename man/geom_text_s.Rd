@@ -18,7 +18,7 @@ geom_label_s(
   default.color = default.colour,
   colour.target = c("text", "box"),
   color.target = colour.target,
-  default.alpha = 1,
+  default.alpha = NA,
   alpha.target = "all",
   label.padding = grid::unit(0.25, "lines"),
   label.r = grid::unit(0.15, "lines"),
@@ -28,6 +28,7 @@ geom_label_s(
   point.padding = 1e-06,
   min.segment.length = 0,
   arrow = NULL,
+  size.unit = "mm",
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
@@ -46,7 +47,7 @@ geom_text_s(
   default.color = default.colour,
   colour.target = "text",
   color.target = colour.target,
-  default.alpha = 1,
+  default.alpha = NA,
   alpha.target = "all",
   add.segments = TRUE,
   box.padding = 0.25,
@@ -55,6 +56,7 @@ geom_text_s(
   min.segment.length = 0,
   arrow = NULL,
   check_overlap = FALSE,
+  size.unit = "mm",
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
@@ -91,8 +93,8 @@ displayed as described in \code{?plotmath}.}
 starting position of each text label. The units for \code{nudge_x} and
 \code{nudge_y} are the same as for the data units on the x-axis and y-axis.}
 
-\item{default.colour, default.color}{A colour definition to use for elements not targeted by
-the colour aesthetic.}
+\item{default.colour, default.color}{A colour definition to use for elements
+not targeted by the colour aesthetic.}
 
 \item{colour.target, color.target}{A vector of character strings; \code{"all"},
 \code{"text"}, \code{"segment"}, \code{"box"}, \code{"box.line"}, and
@@ -122,6 +124,10 @@ are not rendered, in mm.}
 
 \item{arrow}{specification for arrow heads, as created by
 \code{\link[grid]{arrow}}}
+
+\item{size.unit}{How the `size` aesthetic is interpreted: as millimetres
+(`"mm"`, default), points (`"pt"`), centimetres (`"cm"`), inches (`"in"`),
+or picas (`"pc"`).}
 
 \item{na.rm}{If \code{FALSE} (the default), removes missing values with a
 warning.  If \code{TRUE} silently removes missing values.}
@@ -161,7 +167,16 @@ Geometries \code{geom_text_s()} and \code{geom_label_s()} have an
   elements the mappings to colour and alpha aesthetics are applied.
   Differently to \code{geom_label()}, \code{geom_label_s()} obeys aesthetic
   mappings to \code{linewidth} and \code{linetype} applied to the line at the
-  edge of the label box.
+  edge of the label box. These features are reflected in the plot key, except
+  for the segment, assumed not to be used to display information
+  only in coordination with other graphic elements.
+
+  In \code{geom_label_s()} the default \code{fill} is similar to
+  \code{"white"} but with its \code{alpha} component set to 0.75. This
+  differs from \code{"white"} used in \code{geom_label()}: the default fill
+  is semitransparent with the intention that accidental occlusion of
+  observations is obvious irrespective of the order in which layers are added
+  to the plot.
 
   Layer functions \code{geom_text_s()} and \code{geom_label_s()} use by
   default \code{\link{position_nudge_keep}} which is backwards compatible
@@ -177,16 +192,8 @@ Geometries \code{geom_text_s()} and \code{geom_label_s()} have an
   choice of which elements are targeted by the aesthetics and which are
   rendered in a default colour. In the grammar of graphics using the same
   aesthetic with multiple meanings is not allowed, thus, the approach used in
-  our geoms attempts to enforce this.
+  the geometry layer functions from package 'ggpp' attempts to enforce this.
 }
-\section{Under development!}{
- These two geometries are still under development
-  and their user interface subject to change. In 'ggpp' (== 0.5.0) support
-  for aesthetics related to segments was removed, and replaced with
-  parameters and a new mechanism for targeting a the usual aesthetics to
-  text, border, and segment was added.
-}
-
 \section{Plot boundaries and clipping}{
  Note that when you change the scale
   limits for \emph{x} and/or \emph{y} of a plot, text labels stay the same
@@ -220,6 +227,15 @@ Geometries \code{geom_text_s()} and \code{geom_label_s()} have an
   'ggplot2' is used, these geometries behave similarly to the corresponding
   ones from package 'ggplot2' with a default justification of \code{0.5} and
   no segment drawn.
+}
+
+\section{Differences from earlier versions}{
+
+  The user interface is for the most part stable starting from 'ggpp' (==
+  0.5.7). In 'ggpp' (== 0.5.0) support for aesthetics related to segments was
+  removed, and replaced by parameters and a new mechanism for targeting the
+  usual \code{colour} and \code{alpha} aesthetics to text, border, and
+  segment.
 }
 
 \section{Aesthetics}{
@@ -262,10 +278,17 @@ Geometries \code{geom_text_s()} and \code{geom_label_s()} have an
 
 my.cars <- mtcars[c(TRUE, FALSE, FALSE, FALSE), ]
 my.cars$name <- rownames(my.cars)
-p <- ggplot(my.cars, aes(wt, mpg, label = name)) +
-       geom_point(color = "red")
 
-# Use nudging
+# no nudging
+ggplot(my.cars, aes(wt, mpg, label = name)) +
+  geom_text_s() +
+  expand_limits(x = c(2, 6))
+
+# base plot
+p <- ggplot(my.cars, aes(wt, mpg, label = name)) +
+       geom_point()
+
+# Using nudging
 p +
   geom_text_s(nudge_x = 0.12) +
   expand_limits(x = 6.2)
@@ -274,15 +297,8 @@ p +
   expand_limits(x = 1.5)
 p +
   geom_text_s(nudge_x = 0.12,
-              arrow = arrow(length = grid::unit(1.5, "mm"))) +
-  expand_limits(x = 6.2)
-p +
-  geom_text_s(nudge_x = 0.12,
               arrow = arrow(length = grid::unit(1.5, "mm")),
               point.padding = 0.4) +
-  expand_limits(x = 6.2)
-p +
-  geom_text_s(hjust = "left", nudge_x = 0.12) +
   expand_limits(x = 6.2)
 p +
   geom_text_s(nudge_y = 0.1, nudge_x = 0.07) +
@@ -296,7 +312,8 @@ p +
               colour.target = "segment", colour = "red") +
   expand_limits(y = 30)
 p +
-  geom_text_s(angle = 90, nudge_y = 1,
+  geom_text_s(aes(colour = factor(cyl)),
+              angle = 90, nudge_y = 1,
               arrow = arrow(length = grid::unit(1.5, "mm")),
               alpha.target = "segment", alpha = 0.3) +
   expand_limits(y = 30)
@@ -305,13 +322,22 @@ p +
   geom_label_s(nudge_x = 0.12) +
   expand_limits(x = 6.2)
 p +
-  geom_label_s(nudge_x = 0.12, linetype = "dotted", linewidth = 0.4) +
+  geom_label_s(nudge_x = 0.12, linetype = "dotted", linewidth = 0.3) +
   expand_limits(x = 6.2)
 p +
-  geom_label_s(nudge_x = 0.12, linewidth = 0.5, label.r = unit(0, "lines")) +
+  geom_label_s(aes(colour = factor(cyl)),
+               nudge_x = 0.12,
+               colour.target = "box",
+               linewidth = 0.5,
+               label.r = unit(0, "lines")) +
   expand_limits(x = 6.2)
 p +
   geom_label_s(nudge_x = 0.12, linewidth = 0) +
+  expand_limits(x = 6.2)
+
+# No segments
+p +
+  geom_label_s(nudge_x = 0.05, segment.linewidth = 0) +
   expand_limits(x = 6.2)
 
 # Nudging away from arbitrary point
@@ -333,26 +359,24 @@ p +
               arrow = arrow(angle = 20,
                             length = grid::unit(1.5, "mm"),
                             ends = "first",
-                            type = "closed"),
-              show.legend = FALSE) +
+                            type = "closed")) +
   scale_colour_discrete(l = 40) + # luminance, make colours darker
   expand_limits(y = 27)
 
 p +
   geom_text_s(aes(colour = factor(cyl)),
-              colour.target = "text",
               angle = 90,
               nudge_y = 1,
               arrow = arrow(angle = 20,
                             length = grid::unit(1.5, "mm"),
                             ends = "first",
-                            type = "closed"),
-              show.legend = FALSE) +
+                            type = "closed")) +
   scale_colour_discrete(l = 40) + # luminance, make colours darker
   expand_limits(y = 27)
 
 p +
   geom_label_s(aes(colour = factor(cyl)),
+              colour.target = c("box", "text"),
               nudge_x = 0.3,
               arrow = arrow(angle = 20,
                             length = grid::unit(1/3, "lines"))) +
@@ -363,7 +387,7 @@ p +
   geom_label_s(aes(colour = factor(cyl)),
               nudge_x = 0.3,
               colour.target = c("box", "segment"),
-              linewidth = 0.6,
+              linewidth = 0.5,
               arrow = arrow(angle = 20,
                             length = grid::unit(1/3, "lines"))) +
   scale_colour_discrete(l = 40) + # luminance, make colours darker
