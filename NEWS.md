@@ -6,6 +6,13 @@ editor_options:
     wrap: 72
 ---
 
+# ggpp 0.5.8
+
+-  Fix wrong test for availability of 'gginnards' in examples (reported by
+_Joshua Ulrich_ in issue #53).
+-  Revise `position_nudge_to()` to support expansion and contraction of the
+range within which to spread the positions.
+
 # ggpp 0.5.7
 
 Track changes in 'ggplot2' 3.5.0 and 3,5,1. Fix a couple of minor
