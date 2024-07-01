@@ -1,6 +1,6 @@
-c50c93437b047aace89e531722a34e88 *DESCRIPTION
+65664a15d091fa6281e6af2f7590b51f *DESCRIPTION
 0962b8a47fa430f42e21a9a5d170cf7d *NAMESPACE
-241ab874aed8d818dc21174b382fe83e *NEWS.md
+5adb87c113000438c476b758468c70e8 *NEWS.md
 8ea0a47a8099c90ced1bca81e612841b *R/annotate.r
 b6764cc497ad135a789b5b309495da6f *R/compute-npc.r
 bfbf69a0b3c3ceaa85275378f2efdbcf *R/dark-or-light.R
@@ -43,7 +43,7 @@ abff1b2eb6de91afc0da28bc4ac41af8 *R/stat-format-table.R
 be086958ff7ed79f59489609a0f9dda1 *R/utilities.R
 aa205a454828ad4e14fb1bc4cf514411 *R/weather-data.R
 07d56e1afb0ca9efd8af314618f57fc2 *R/wrap-labels.R
-dbc481c35faf22b5ebbc978902e95a0c *README.md
+829237ed2309c5cb149243426e8b172c *README.md
 b54db8794555342c4feee5fe0b1b8f5b *build/partial.rdb
 91e25ba9e896fca673ca255bb3546ef1 *build/vignette.rds
 1741e647ad26579390ed1d491b4cbc78 *data/birch.rda
@@ -53,10 +53,10 @@ e9d90dc972d7db7caac2cb068ea367f5 *data/volcano-example-df.rda
 e40555014d5a4ca121254ad4e28fec0f *data/weather-18-june-2019-df.rda
 3048dd865282a3993e2b2cce050ddf9d *inst/doc/grammar-extensions.R
 14abd69b183e3b56e38e84afd6c9b298 *inst/doc/grammar-extensions.Rmd
-134990f7d36caf969f2f2c90b879420f *inst/doc/grammar-extensions.html
-9f660c2331245084f6a545dda6c6c16a *inst/doc/nudge-examples.R
-f33bb00aa2491d9469b8aa13733b0b5d *inst/doc/nudge-examples.Rmd
-0a8842dc2e02a91aa2ba92296a6391a1 *inst/doc/nudge-examples.html
+0b3037e514a90ea78485822802630c74 *inst/doc/grammar-extensions.html
+6ec0b5c2cab4a7abf58a2474a7275771 *inst/doc/nudge-examples.R
+a7eb50458057ae1fe5fd6c674fbbf0cd *inst/doc/nudge-examples.Rmd
+ddd39cc0c265c6873af8a836426e5f72 *inst/doc/nudge-examples.html
 ce14b91c9fd39db7e36f03e524c580c0 *inst/extdata/Isoquercitin.png
 80741f548e590d5fa19cb5cb7892af35 *inst/extdata/Robinin.png
 4e0effc55d8d488ac1bb86bfc2c79f74 *inst/extdata/logo-ggpp.png
@@ -70,7 +70,7 @@ a3eaedaa6fa68f7ff0600af677b48171 *man/figures/README-readme-06-1.png
 94c83cf67c7165f3a8d2a2ff6d2143d3 *man/figures/README-unnamed-chunk-1-1.png
 bc5d38c76938db292fcf5a6da4ae5b37 *man/figures/README-unnamed-chunk-2-1.png
 63d9d2f707de1e340b1b70a8c679ec08 *man/figures/README-unnamed-chunk-3-1.png
-4e0effc55d8d488ac1bb86bfc2c79f74 *man/figures/logo-ggpp.png
+4e0effc55d8d488ac1bb86bfc2c79f74 *man/figures/logo.png
 dcbf79aaaa72cd3444759c6b62c41588 *man/geom_grob.Rd
 70ce0cc70cd1193435f47af19087227a *man/geom_plot.Rd
 d37ed65b06d7523e777a1e638d13ed49 *man/geom_point_s.Rd
@@ -84,7 +84,7 @@ cc7420e57d00566191d3c0f9eeec2209 *man/geom_x_margin_grob.Rd
 f84422eb9783971225154bf04d08708f *man/geom_x_margin_point.Rd
 da4d27eb74954b0849798d2a19a00541 *man/ggplot.Rd
 754dea7479608c51fbb786fdb6e3f1e5 *man/ggpp-ggproto.Rd
-7c6916345390f4aadba416c350d20419 *man/ggpp-package.Rd
+2b86d0c1c8b10f2b7663c08bb24410aa *man/ggpp-package.Rd
 309f9d881bcc24c8811886d4523a1a7d *man/ggpp_draw_key.Rd
 01aac95e17f9b36f3c6b2671ef03dcf2 *man/ivy.df.Rd
 a2eee4046372e21a5368905f6b21f664 *man/position_dodgenudge.Rd
@@ -536,4 +536,4 @@ a9bd966e5345b3c71a3357c1766fb66b *tests/testthat/test-ttheme_gtsimple.R
 091f008624818258cc2c67ede31f45fe *tests/testthat/test-weather-data.R
 3a62fe36281489049cf2fa68ef6205b5 *tests/testthat/test-wrap-labels.R
 14abd69b183e3b56e38e84afd6c9b298 *vignettes/grammar-extensions.Rmd
-f33bb00aa2491d9469b8aa13733b0b5d *vignettes/nudge-examples.Rmd
+a7eb50458057ae1fe5fd6c674fbbf0cd *vignettes/nudge-examples.Rmd
