@@ -13,9 +13,9 @@ geom_table(
   ...,
   nudge_x = 0,
   nudge_y = 0,
-  default.colour = "black",
+  default.colour = NA,
   default.color = default.colour,
-  colour.target = "box",
+  colour.target = "table.text",
   color.target = colour.target,
   default.alpha = 1,
   alpha.target = "all",
@@ -41,6 +41,12 @@ geom_table_npc(
   stat = "identity",
   position = "identity",
   ...,
+  default.colour = NA,
+  default.color = default.colour,
+  colour.target = "table.text",
+  color.target = colour.target,
+  default.alpha = 1,
+  alpha.target = "all",
   table.theme = NULL,
   table.rownames = FALSE,
   table.colnames = TRUE,
@@ -72,18 +78,22 @@ can include aesthetics whose values you want to set, not map. See
 starting position of each text label. The units for \code{nudge_x} and
 \code{nudge_y} are the same as for the data units on the x-axis and y-axis.}
 
-\item{default.colour, default.color}{A colour definition to use for elements not targeted by
-the colour aesthetic.}
+\item{default.colour, default.color}{A colour definition to use for elements
+not targeted by the colour aesthetic. If \code{NA} the colours in the table
+theme are not modified.}
 
-\item{colour.target, color.target}{A vector of character strings; \code{"all"},
-\code{"box"} and \code{"segment"} or \code{"none"}.}
+\item{colour.target, color.target}{A vector of character strings with one or
+more of \code{"all"}, \code{"table"}, \code{"table.text"},
+\code{"table.rules"}, \code{"segment"} or \code{"none"}.}
 
 \item{default.alpha}{numeric in [0..1] A transparency value to use for
-elements not targeted by the alpha aesthetic.}
+elements not targeted by the alpha aesthetic. If \code{NA} the alpha
+channel of the colour definitions is not modified.}
 
-\item{alpha.target}{A vector of character strings; \code{"all"},
-\code{"segment"}, \code{"box"}, \code{"box.line"}, and
-\code{"box.fill"} or \code{"none"}.}
+\item{alpha.target}{A vector of character strings with one or
+more of \code{"all"}, \code{"table"}, \code{"table.text"},
+\code{"table.rules"} and \code{"table.canvas"}, \code{"segment"} or
+\code{"none"}.}
 
 \item{add.segments}{logical Display connecting segments or arrows between
 original positions and displaced ones if both are available.}
@@ -100,7 +110,8 @@ are not rendered, in mm.}
 \code{\link[grid]{arrow}}}
 
 \item{table.theme}{NULL, list or function A gridExtra ttheme defintion, or
-a constructor for a ttheme or NULL for default.}
+a constructor for a ttheme or NULL for default. If \code{nULL} the theme
+is retrieved from R option \code{} at the time the plot is rendered.}
 
 \item{table.rownames, table.colnames}{logical flag to enable or disable
 printing of row names and column names.}
@@ -139,34 +150,50 @@ as annotations to plots, but contrary to layer function \code{annotate},
 thus plot insets can differ among panels.
 }
 \details{
-By default \code{geom_table()} uses \code{\link{position_nudge_center}} which is
-  backwards compatible with \code{\link[ggplot2]{position_nudge}} but
-  provides additional control on the direction of the nudging. In contrast to
+By default \code{geom_table()} uses
+  \code{\link{position_nudge_center}} which is backwards compatible with
+  \code{\link[ggplot2]{position_nudge}} but provides additional control on
+  the direction of the nudging. In contrast to
   \code{\link[ggplot2]{position_nudge}}, \code{\link{position_nudge_center}}
   and all other position functions defined in packages 'ggpp' and 'ggrepel'
   keep the original coordinates thus allowing the plotting of connecting
   segments and arrows.
 
-  This geom works only with tibbles as \code{data}, as its expects a list of
-  data frames (or tibbles) to be mapped to the \code{label} aesthetic. A
-  table is built with function \code{gridExtra::gtable} for each data frame
-  in the list, and formatted according to a table theme or \code{ttheme}. The
-  character strings in the data frame can be parsed into R expressions so the
-  inset tables can include maths.
+  \code{geom_table} and \code{geom_table_npc} expect a list of data frames
+  (\code{"data.frame"} class or derived) to be mapped to the \code{label}
+  aesthetic. These geoms work with tibbles or data frames as \code{data} as
+  they both support \code{list} objects as member variables.
 
-  If the argument passed to \code{table.theme} is a constructor function
-  (passing its name without parenthesis), the values mapped to \code{size},
-  \code{colour}, \code{fill}, \code{alpha}, and \code{family} aesthetics will
-  the passed to this theme constructor for each individual table. In
-  contrast, if a ready constructed \code{ttheme} stored as a list object is
-  passed as argument (e.g., by calling the constructor, using constructor
-  name followed by parenthesis), it will be used as is, i.e., mappings to
-  aesthetics such as \code{colour} are ignored if present. By default the
-  constructor \code{ttheme_gtdefault} is used and \code{colour} and
+  A table is built with function \code{gridExtra::gtable} for each
+  data frame in the list, and formatted according to a \code{ttheme} (table
+  theme) list object or \code{ttheme} constructor function passed as argument
+  to parameter \code{table.theme}. If the value passed as argument to
+  \code{table.theme} is \code{NULL} the table theme used is that set as
+  default through R option \code{ggpmisc.ttheme.default} at the time the plot
+  is rendered or the \code{\link{ttheme_gtdefault}} constructor function if
+  not set.
+
+  If the argument passed to \code{table.theme} or set through R option
+  \code{ggpmisc.ttheme.default} is a constructor function (passing its name
+  without parenthesis), the values mapped to \code{size}, \code{colour},
+  \code{fill}, \code{alpha}, and \code{family} aesthetics will the passed to
+  this theme constructor for each individual table. In contrast, if a ready
+  constructed \code{ttheme} stored as a list object is passed as argument
+  (e.g., by calling the constructor, using constructor name followed by
+  parenthesis), it is used as is, with mappings to aesthetics \code{colour},
+  \code{fill}, \code{alpha}, and \code{family} ignored if present. By default
+  the constructor \code{ttheme_gtdefault} is used and \code{colour} and
   \code{fill}, are mapped to \code{NA}. Mapping these aesthetics to \code{NA}
-  triggers the use of the default \code{base_colour} of the \code{ttheme}. As
-  the table is built with function \code{gridExtra::gtable()}, for formatting
-  details, please, consult \code{\link[gridExtra]{tableGrob}}.
+  triggers the use the values set in the \code{ttheme}. As the table is built
+  with function \code{gridExtra::gtable()}, for details, please, consult
+  \code{\link[gridExtra]{tableGrob}} and \code{\link{ttheme_gtdefault}}.
+
+  The character strings in the data frame can be parsed into R expressions so
+  the inset tables can include maths. With \code{parse = TRUE} parsing is
+  attempted on each table cell, but failure triggers fall-back to rendering
+  without parsing, on a cell by cell basis. Thus, a table can contain a
+  mixture cells and/or headings that require parsing or not (see the
+  documentation in \link[gridExtra]{gridExtra-package} for details).
 
   The \code{x} and \code{y} aesthetics determine the position of the whole
   inset table, similarly to that of a text label, justification is
@@ -174,11 +201,12 @@ By default \code{geom_table()} uses \code{\link{position_nudge_center}} which is
   its \emph{horizontal} and \emph{vertical} axes (rows and columns in the
   data frame), and \code{angle} is used to rotate the inset table as a whole.
 
-  Of these two geoms only \code{\link{geom_grob}} supports the plotting of
-  segments, as \code{\link{geom_grob_npc}} uses a coordinate system that is
-  unrelated to data units and data.In the case of \code{geom_table_npc},
-  \code{npcx} and \code{npcy} aesthetics determine the position of the inset
-  table. Justification as described above for .
+  Of these two geoms only \code{\link{geom_table}} supports the plotting of
+  segments when its position has been modified by a \code{position} function.
+  This is because \code{\link{geom_table_npc}} uses a coordinate system that
+  is unrelated to data units, scales or data in other plot layers. In the
+  case of \code{geom_table_npc}, \code{npcx} and \code{npcy}
+  pseudo-aesthetics determine the position of the inset table.
 }
 \note{
 Complex tables with annotations or different colouring of rows or cells
@@ -237,6 +265,8 @@ Complex tables with annotations or different colouring of rows or cells
 library(dplyr)
 library(tibble)
 
+theme_set(theme_bw())
+
 mtcars \%>\%
   group_by(cyl) \%>\%
   summarize(wt = mean(wt), mpg = mean(mpg)) \%>\%
@@ -244,7 +274,7 @@ mtcars \%>\%
   mutate(wt = sprintf("\%.2f", wt),
          mpg = sprintf("\%.1f", mpg)) -> tb
 
-df <- tibble(x = 5.45, y = 34, tb = list(tb))
+df <- data.frame(x = 5.45, y = 34, tb = I(list(tb)))
 
 # using defaults
 ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
@@ -252,21 +282,14 @@ ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
   geom_table(data = df,
              aes(x = x, y = y, label = tb))
 
-ggplot(mtcars,
-       aes(wt, mpg, colour = factor(cyl))) +
-  geom_point() +
-  geom_table(data = df,
-             aes(x = x, y = y, label = tb),
-             table.rownames = TRUE,
-             table.theme = ttheme_gtstripes)
-
 # settings aesthetics to constants
 ggplot(mtcars,
        aes(wt, mpg, colour = factor(cyl))) +
   geom_point() +
   geom_table(data = df,
              aes(x = x, y = y, label = tb),
-             color = "red", fill = "#FFCCCC",
+             color = "red",
+             fill = "#FFCCCC",
              family = "serif", size = 5,
              angle = 90, vjust = 0)
 
@@ -276,8 +299,22 @@ ggplot(mtcars,
   geom_point() +
   geom_table(data = df,
              aes(x = x, y = y, label = tb),
-             table.theme = ttheme_gtminimal) +
+             table.theme = ttheme_gtstripes) +
   theme_classic()
+
+# transparency
+ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
+  geom_point() +
+  geom_table(data = df,
+             aes(x = x, y = y, label = tb),
+             alpha = 0.5) +
+  theme_bw()
+
+ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
+  geom_point() +
+  geom_table(data = df,
+             aes(x = x, y = y, label = tb),
+             alpha = 0.5, alpha.target = "table.canvas")
 
 df2 <- tibble(x = 5.45,
               y = c(34, 29, 24),
@@ -294,6 +331,14 @@ ggplot(mtcars,
              inherit.aes = TRUE,
              mapping = aes(x = x, y = y, label = tb))
 
+ggplot(mtcars,
+       aes(wt, mpg, color = factor(cyl))) +
+  geom_point() +
+  geom_table(data = df2,
+             inherit.aes = TRUE,
+             colour.target = "table.rules",
+             mapping = aes(x = x, y = y, label = tb))
+
 # nudging and segments
 ggplot(mtcars,
        aes(wt, mpg, color = factor(cyl))) +
@@ -304,6 +349,18 @@ ggplot(mtcars,
              nudge_x = 0.7, nudge_y = 3,
              vjust = 0.5, hjust = 0.5,
              arrow = arrow(length = unit(0.5, "lines"))) +
+  theme_classic()
+
+ggplot(mtcars,
+       aes(wt, mpg, color = factor(cyl))) +
+  geom_point(show.legend = FALSE) +
+  geom_table(data = df2,
+             inherit.aes = TRUE,
+             mapping = aes(x = x1, y = y1, label = tb),
+             nudge_x = 0.7, nudge_y = 3,
+             vjust = 0.5, hjust = 0.5,
+             arrow = arrow(length = unit(0.5, "lines")),
+             colour.target = c("table.rules", "segment")) +
   theme_classic()
 
 # Using native plot coordinates instead of data coordinates

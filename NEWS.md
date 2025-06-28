@@ -6,6 +6,18 @@ editor_options:
     wrap: 72
 ---
 
+# ggpp 0.5.9
+
+- Ensure compatibility with upcoming 'ggplot2' 4.0.0.
+- When used with 'ggplot2' 4.0.0 support parameter `reverse` in 
+`position_dodge_keep()`, `position_dodgenudge()` and `position_dodgenudge_to()`.
+- Add `position_dodgenudge_to()` and `position_dodge2nudge_to()` that allow the 
+action of `position_nudge_to()` to be combined with dodging.
+- Add `position_stacknudge_to()` and `position_fillnudge_to()` that allow the 
+action of `position_nudge_to()` to be combined with stacking.
+- Update `geom_table()`, `geom_table_npc()` and the table-theme constructors to 
+support transparency with the `alpha` aesthetic.
+
 # ggpp 0.5.8-1
 
 -  Fix wrong test for availability of 'gginnards' in examples (reported by
@@ -73,7 +85,7 @@ and `point.padding`.
 with `geom_label_s()` and `geom_label_pairwise()`.
 -   Add `position_stack_minmax()` to correctly position error bars in stacked plots.
 -   Add data sets `birch.df`and `birch_dw.df` with data for 350 birch seedlings.
--   Add data set `weather_18_june_2019.df` with data at 1 min intercal for 24 h.
+-   Add data set `weather_18_june_2019.df` with data at 1 min interval for 24 h.
 -   Move transcriptomics data sets `quadrant_example.df` and `volcano_example.df` from 'ggpmisc' to 'ggpp'.
 
 # ggpp 0.5.4

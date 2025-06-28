@@ -177,10 +177,12 @@ ggplot(subset(df, x >= 0), aes(x, x^2)) +
 
 Other position adjustments: 
 \code{\link{position_dodgenudge}()},
+\code{\link{position_dodgenudge_to}()},
 \code{\link{position_jitternudge}()},
 \code{\link{position_nudge_center}()},
 \code{\link{position_nudge_keep}()},
 \code{\link{position_nudge_to}()},
-\code{\link{position_stacknudge}()}
+\code{\link{position_stacknudge}()},
+\code{\link{position_stacknudge_to}()}
 }
 \concept{position adjustments}

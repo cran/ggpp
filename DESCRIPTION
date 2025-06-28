@@ -1,8 +1,8 @@
 Package: ggpp
 Type: Package
 Title: Grammar Extensions to 'ggplot2'
-Version: 0.5.8-1
-Date: 2024-06-30
+Version: 0.5.9
+Date: 2025-06-27
 Authors@R: 
     c(
     person("Pedro J.", "Aphalo", email = "pedro.aphalo@helsinki.fi", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3385-972X")),
@@ -24,7 +24,7 @@ License: GPL (>= 2)
 LazyData: TRUE
 LazyLoad: TRUE
 ByteCompile: TRUE
-Depends: R (>= 4.0.0), ggplot2 (>= 3.5.0)
+Depends: R (>= 4.1.0), ggplot2 (>= 3.5.0)
 Imports: stats, grid, grDevices, rlang (>= 1.0.6), vctrs (>= 0.6.0),
         magrittr (>= 2.0.1), glue (>= 1.6.0), gridExtra (>= 2.3),
         scales (>= 1.2.0), tibble (>= 3.1.8), dplyr (>= 1.1.0), xts (>=
@@ -37,7 +37,7 @@ URL: https://docs.r4photobiology.info/ggpp/,
         https://github.com/aphalo/ggpp
 BugReports: https://github.com/aphalo/ggpp/issues
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Collate: 'annotate.r' 'compute-npc.r' 'dark-or-light.R'
         'example-data.R' 'geom-grob.R' 'ggpp-legend-draw.R'
@@ -47,21 +47,25 @@ Collate: 'annotate.r' 'compute-npc.r' 'dark-or-light.R'
         'geom-margin-point.r' 'geom-plot.R' 'geom-point-linked.r'
         'geom-quadrant-lines.R' 'geom-table.R' 'geom-text-linked.r'
         'geom-text-npc.r' 'geom-text-pairwise.R' 'ggpp.R'
-        'position-nudge-center.R' 'position-nudge-dodge.R'
-        'position-nudge-dodge2.R' 'position-nudge-jitter.R'
-        'position-nudge-line.R' 'position-nudge-stack.R'
-        'position-nudge-to.R' 'scale-continuous-npc.r' 'stat-apply.R'
-        'stat-dens1d-filter.r' 'stat-dens1d-labels.r'
+        'position-dodge-nudge-to.R' 'position-dodge-nudge.R'
+        'position-dodge2-nudge.R' 'position-dodge2nudge-to.R'
+        'position-jitter-nudge.R' 'position-nudge-center.R'
+        'position-nudge-line.R' 'position-stack-nudge.R'
+        'position-stacknudge-to.R' 'scale-continuous-npc.r'
+        'stat-apply.R' 'stat-dens1d-filter.r' 'stat-dens1d-labels.r'
         'stat-dens2d-filter.r' 'stat-dens2d-labels.r'
         'stat-format-table.R' 'stat-functions.R' 'stat-panel-counts.R'
         'stat-quadrant-counts.R' 'try-data-frame.R' 'weather-data.R'
         'wrap-labels.R'
 NeedsCompilation: no
-Packaged: 2024-06-30 21:25:57 UTC; aphalo
-Author: Pedro J. Aphalo [aut, cre] (<https://orcid.org/0000-0003-3385-972X>),
-  Kamil Slowikowski [ctb] (<https://orcid.org/0000-0002-2843-6370>),
-  Michał Krassowski [ctb] (<https://orcid.org/0000-0002-9638-7785>),
+Packaged: 2025-06-27 20:39:11 UTC; Aphalo
+Author: Pedro J. Aphalo [aut, cre] (ORCID:
+    <https://orcid.org/0000-0003-3385-972X>),
+  Kamil Slowikowski [ctb] (ORCID:
+    <https://orcid.org/0000-0002-2843-6370>),
+  Michał Krassowski [ctb] (ORCID:
+    <https://orcid.org/0000-0002-9638-7785>),
   Daniel Sabanés Bové [ctb],
   Stella Banjo [ctb]
 Repository: CRAN
-Date/Publication: 2024-07-01 07:40:02 UTC
+Date/Publication: 2025-06-28 04:40:02 UTC
