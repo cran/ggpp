@@ -172,44 +172,33 @@
 #'     stat_dens2d_labels(geom = "text_repel", label.fill = NA)
 #'
 #' # we keep labels starting with "a" across the whole plot, but all in sparse
-#' # regions. To achieve this we pass as argument to label.fill a fucntion
+#' # regions. To achieve this we pass as argument to label.fill a function
 #' # instead of a character string.
 #'   label.fun <- function(x) {ifelse(grepl("^a", x), x, "")}
 #'   ggplot(data = d, aes(x, y, label = lab, colour = group)) +
 #'     geom_point() +
 #'     stat_dens2d_labels(geom = "text_repel", label.fill = label.fun)
 #' }
-#' # Using geom_debug() we can see that all 100 rows in \code{d} are
-#' # returned. But only those labelled in the previous example still contain
-#' # the original labels.
 #'
+#' # Using geom_debug_group() we can see that all 100 rows in \code{d} are
+#' # returned.
 #' gginnards.installed <- requireNamespace("gginnards", quietly = TRUE)
 #' if (gginnards.installed) {
 #'   library(gginnards)
 #'
 #'   ggplot(data = d, aes(x, y, label = lab)) +
 #'     geom_point() +
-#'     stat_dens2d_labels(geom = "debug")
-#'
+#'     stat_dens2d_labels(geom = "debug_group")
+#' }
+#' if (gginnards.installed) {
 #'   ggplot(data = d, aes(x, y, label = lab)) +
 #'     geom_point() +
-#'     stat_dens2d_labels(geom = "debug", return.density = TRUE)
-#'
-#'   ggplot(data = d, aes(x, y, label = lab)) +
-#'     geom_point() +
-#'     stat_dens2d_labels(geom = "debug", label.fill = NULL)
-#'
-#'   ggplot(data = d, aes(x, y, label = lab)) +
-#'     geom_point() +
-#'     stat_dens2d_labels(geom = "debug", label.fill = FALSE, return.density = TRUE)
-#'
-#'   ggplot(data = d, aes(x, y, label = lab)) +
-#'     geom_point() +
-#'     stat_dens2d_labels(geom = "debug", label.fill = NULL, return.density = TRUE)
-#'
+#'     stat_dens2d_labels(geom = "debug_group", return.density = TRUE)
+#' }
+#' if (gginnards.installed) {
 #'   ggplot(data = d, aes(x, y)) +
 #'     geom_point() +
-#'     stat_dens2d_labels(geom = "debug")
+#'     stat_dens2d_labels(geom = "debug_group")
 #' }
 #'
 stat_dens2d_labels <-
