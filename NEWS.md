@@ -6,6 +6,11 @@ editor_options:
     wrap: 72
 ---
 
+# ggpp 0.6.1
+
+- Support `orientation` flipping in `geom_text_pairwise()` and 
+`geom_label_pairwise()`.
+
 # ggpp 0.6.0
 
 This version adds support for new features from 'ggplot2' (>= 4.0.0) but
